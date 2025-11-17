@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>🥣 Desperdícios / Sobras / Devoluções</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0f19;--card:#151d2f;--accent:#ff8f1f;--accent2:#ffb347;
+  --text:#f8fafc;--muted:#94a3b8;--success:#22c55e;
+  --error:#ef4444;--shadow:0 4px 10px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;font-family:'Inter',sans-serif;background:var(--bg);
+  color:var(--text);min-height:100vh;display:flex;flex-direction:column;
+}
+header{
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  color:#000;text-align:center;padding:14px;font-weight:700;font-size:18px;
+  box-shadow:0 3px 8px rgba(0,0,0,.4);
+}
+.container{max-width:700px;margin:auto;padding:16px;width:100%;flex:1;}
+.section{
+  background:var(--card);border-radius:16px;padding:18px;
+  box-shadow:var(--shadow);margin-bottom:18px;
+}
+.input,.select,textarea{
+  width:100%;padding:10px;margin:6px 0;border:0;border-radius:8px;
+  background:#1e293b;color:#fff;font-size:14px;
+}
+textarea{min-height:60px;resize:none;}
+.btn{
+  border:0;border-radius:8px;font-weight:600;
+  background:var(--accent);color:#000;cursor:pointer;
+  transition:.2s;font-size:14px;padding:8px 14px;min-width:100px;
+}
+.btn:hover{background:var(--accent2);}
+.btn.small{font-size:13px;padding:6px 12px;}
+.btn.done{background:var(--success)!important;color:#fff!important;}
+.item{
+  background:#1e293b;border-radius:10px;padding:10px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin:6px 0;transition:background .15s;
+}
+.item:hover{background:#25334e;}
+.toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:var(--accent);color:#000;padding:10px 18px;border-radius:999px;
+  font-weight:600;box-shadow:var(--shadow);display:none;z-index:9999;
+}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:16px;}
+.popup-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  display:flex;align-items:center;justify-content:center;
+  z-index:10000;backdrop-filter:blur(2px);
+}
+.popup{
+  background:#1e293b;border-radius:12px;padding:20px;
+  max-width:420px;width:90%;box-shadow:0 4px 18px rgba(0,0,0,.6);
+  color:#fff;font-family:Inter,sans-serif;
+}
+.popup h3{text-align:center;margin:0 0 10px;color:#ffb347}
+.popup textarea{
+  width:100%;min-height:70px;margin-top:10px;border-radius:8px;
+  border:1px solid #334155;background:#0f172a;color:#fff;padding:8px;
+  resize:none;font-size:13px;
+}
+.popup button{
+  background:#ff8f1f;border:0;border-radius:8px;color:#000;
+  font-weight:600;padding:8px 14px;width:100%;margin-top:10px;
+  cursor:pointer;
+}
+.loader{
+  position:fixed;top:10px;right:10px;font-size:12px;
+  color:#94a3b8;display:none;
+}
+</style>
+</head>
+<body>
+
+<header>🥣 Desperdícios / Sobras / Devoluções</header>
+<div class="loader" id="loader">⏳ Atualizando...</div>
+
+<div class="container">
+  <div class="section" style="text-align:center">
+    <h3 id="empresaTitulo"></h3>
+    <p id="usuarioInfo" style="color:var(--muted);font-size:14px"></p>
+  </div>
+
+  <div class="section">
+    <select id="categoria" class="select">
+      <option value="">Selecione a categoria</option>
+      <option>Desperdício (Descartada)</option>
+      <option>Reaproveitamento</option>
+      <option>Devolução de clientes</option>
+    </select>
+    <input id="item" class="input" placeholder="Item">
+    <div style="display:flex;gap:6px">
+      <input id="quantidade" class="input" style="flex:2" placeholder="Quantidade">
+      <input id="unidade" class="input" style="flex:1" placeholder="Un. Medida">
+    </div>
+    <textarea id="observacao" placeholder="Observação (Obrigatória)"></textarea>
+    <button class="btn" onclick="registrarItem()">Registrar</button>
+  </div>
+
+  <div class="section" id="listaRegistros"><p>Carregando registros...</p></div>
+
+  <div style="text-align:center;margin-top:20px">
+    <button class="btn" onclick="abrirResumo()">✅ Finalizar Dia</button>
+  </div>
+
+  <div style="text-align:center;margin-top:20px">
+    <button class="btn" style="background:#334155;color:#fff" onclick="voltar()">⬅ Voltar</button>
+  </div>
+
+  <footer>©2025 Grupo Delícia & Mercatto</footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const GAS_URL='https://script.google.com/macros/s/AKfycbzBFsBc2tVmkyWC471zIJj1dqf-cA6zaWvtlEN-jm--DnbiYEmwrHiJRj-VPN-qsDUw/exec';
+const $=s=>document.querySelector(s);
+
+let empresaAtual=localStorage.getItem('empresa')||'MERCATTO DELÍCIA';
+let gerenteAtual=localStorage.getItem('gerente')||'Gerente';
+$('#empresaTitulo').textContent=`Empresa: ${empresaAtual}`;
+$('#usuarioInfo').textContent=`Gerente: ${gerenteAtual}`;
+
+let registros=[];
+
+/* ⚡ Inicializa sem travar a tela */
+window.addEventListener('DOMContentLoaded',()=>{
+  carregar(false); // em background
+  setInterval(()=>carregar(true),30000); // atualiza leve a cada 30s
+});
+
+/* ==== CARREGAR DADOS ==== */
+async function carregar(showLoader){
+  const loader=$('#loader');
+  if(showLoader) loader.style.display='block';
+  try{
+    const res=await fetch(`${GAS_URL}?action=desperdicios&empresa=${encodeURIComponent(empresaAtual)}`);
+    const data=await res.json();
+    if(JSON.stringify(data)!==JSON.stringify(registros)){ // evita re-render desnecessário
+      registros=data||[];
+      renderLista();
+    }
+  }catch(err){console.error(err);toast('⚠️ Erro ao atualizar');}
+  loader.style.display='none';
+}
+
+/* ==== RENDER ==== */
+function renderLista(){
+  const box=$('#listaRegistros');
+  if(!registros.length){box.innerHTML='<p>Nenhum registro.</p>';return;}
+  box.innerHTML=registros.map(r=>`
+    <div class="item">
+      <div>${r.categoria} - ${r.item} (${r.quantidade} ${r.unidade})</div>
+      <button class="btn small done" onclick="mostrarRegistro('${r.item}')">Ver</button>
+    </div>`).join('');
+}
+
+async function registrarItem(){
+  const cat=$('#categoria').value.trim();
+  const item=$('#item').value.trim();
+  const qtd=$('#quantidade').value.trim();
+  const un=$('#unidade').value.trim();
+  const obs=$('#observacao').value.trim();
+
+  if(!cat||!item||!qtd||!un){
+    return toast('⚠️ Preencha todos os campos.');
+  }
+  if(!obs){
+    return toast('⚠️ Informe a observação antes de registrar.');
+  }
+
+  try{
+    await fetch(GAS_URL,{
+      method:'POST',
+      body:JSON.stringify({
+        action:'registrarDesperdicio',
+        empresa:empresaAtual,
+        gerente:gerenteAtual,
+        categoria:cat,
+        item,
+        quantidade:qtd,
+        unidade:un,
+        observacao:obs
+      })
+    });
+    toast('✅ Registro salvo!');
+    $('#item').value='';
+    $('#quantidade').value='';
+    $('#unidade').value='';
+    $('#observacao').value='';
+    carregar(true);
+  }catch{
+    toast('Erro ao salvar.');
+  }
+}
+
+
+/* ==== DETALHES ==== */
+function mostrarRegistro(item){
+  const dados=registros.filter(r=>r.item===item);
+  const fmt=d=>{try{
+    const date=new Date(d);return date.toLocaleString("pt-BR",{timeZone:"America/Bahia"});
+  }catch{return d;}};
+  const html=dados.map(d=>`
+    <div style="margin-bottom:6px;">
+      <b>${fmt(d.data)}</b> • ${d.gerente} → ${d.categoria} ${d.quantidade}${d.unidade}
+    </div>`).join('');
+  const p=document.createElement('div');
+  p.className='popup-bg';
+  p.innerHTML=`<div class="popup"><h3>${item}</h3><p>${html}</p><button onclick="this.closest('.popup-bg').remove()">Fechar</button></div>`;
+  document.body.appendChild(p);
+}
+
+/* ==== RESUMO ==== */
+function abrirResumo(){
+  const totalPratos=registros.filter(r=>r.unidade.toLowerCase().includes('prato')).reduce((s,r)=>s+Number(r.quantidade||0),0);
+  const totalKg=registros.filter(r=>r.unidade.toLowerCase().includes('kg')).reduce((s,r)=>s+Number(r.quantidade||0),0);
+  const p=document.createElement('div');
+  p.className='popup-bg';
+  p.innerHTML=`
+  <div class="popup">
+    <h3>📊 Resumo do Dia</h3>
+    <p><b>Total de pratos:</b> ${totalPratos}</p>
+    <p><b>Total em kg:</b> ${totalKg}</p>
+    <textarea id="justificativa" placeholder="Observações do fechamento..."></textarea>
+    <button onclick="finalizarDia()">Confirmar Fechamento</button>
+  </div>`;
+  document.body.appendChild(p);
+}
+
+/* ==== FINALIZAR ==== */
+async function finalizarDia(){
+  const j=$('#justificativa').value.trim();
+  try{
+    await fetch(GAS_URL,{method:'POST',body:JSON.stringify({
+      action:'finalizarDesperdicio',
+      empresa:empresaAtual,
+      gerente:gerenteAtual,
+      justificativa:j
+    })});
+    toast('🎯 Dia finalizado.');
+    document.querySelector('.popup-bg').remove();
+    carregar(true);
+  }catch{toast('Erro ao finalizar.');}
+}
+
+/* ==== UTIL ==== */
+function voltar(){window.location.href='index.html';}
+function toast(msg){
+  const el=$('#toast');
+  el.textContent=msg;el.style.display='block';
+  clearTimeout(el.timeout);el.timeout=setTimeout(()=>el.style.display='none',2000);
+}
+</script>
+</body>
+</html>

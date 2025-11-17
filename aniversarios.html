@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Painel de Reservas • Mercatto Delícia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#f3f4f6; --card:#fff; --text:#111827; --muted:#6b7280;
+      --accent:#b8860b; --accent-dark:#8b6a05; --ok:#16a34a; --no:#dc2626;
+      --radius:12px; --shadow:0 6px 16px rgba(0,0,0,.08);
+    }
+    body {
+      font-family:'Inter',sans-serif; background:var(--bg); color:var(--text);
+      margin:0; padding:0; min-height:100vh;
+    }
+    header {
+      background:var(--accent); color:#fff; text-align:center; padding:14px 0;
+      font-weight:700; font-size:1.1rem;
+    }
+    #lista {
+      display:flex; flex-direction:column; gap:12px;
+      padding:14px; margin-bottom:60px;
+    }
+    .card {
+      background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+      padding:14px; font-size:0.95rem;
+    }
+    .info { font-size:0.85rem; color:var(--muted); margin:4px 0; }
+    .nome { font-weight:600; color:var(--text); font-size:1rem; margin-bottom:6px; }
+    .botoes { display:flex; gap:10px; margin-top:10px; }
+    .btn {
+      flex:1; border:none; border-radius:var(--radius);
+      color:#fff; font-weight:600; padding:10px; cursor:pointer; transition:.2s;
+      position:relative; overflow:hidden;
+    }
+    .btn span { position:relative; z-index:2; }
+    .ok { background:var(--ok); }
+    .no { background:var(--no); }
+    .btn.loading span { visibility:hidden; }
+    .btn.loading::after {
+      content:''; position:absolute; inset:0;
+      background:rgba(255,255,255,0.4);
+      display:flex; justify-content:center; align-items:center;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0%,100%{opacity:.4;} 50%{opacity:1;}
+    }
+    .pendente { background:#fde68a; color:#92400e; padding:4px 10px; border-radius:8px; font-size:0.75rem; display:inline-block; }
+    .aprovado { background:#bbf7d0; color:#065f46; padding:4px 10px; border-radius:8px; font-size:0.75rem; display:inline-block; }
+    .negado { background:#fecaca; color:#7f1d1d; padding:4px 10px; border-radius:8px; font-size:0.75rem; display:inline-block; }
+    #carregando { text-align:center; margin-top:40px; color:var(--muted); font-weight:600; }
+    footer {
+      position:fixed; bottom:0; width:100%; background:#fff; border-top:1px solid #e5e7eb;
+      text-align:center; padding:8px; font-size:0.8rem; color:var(--muted);
+    }
+    @media (max-width:480px){
+      .card{padding:12px;}
+      .nome{font-size:1rem;}
+      .btn{padding:9px;font-size:0.85rem;}
+    }
+  </style>
+</head>
+<body>
+  <header>📋 Painel de Reservas</header>
+  <div id="lista"><div id="carregando">Carregando reservas...</div></div>
+  <footer>Mercatto Delícia • Painel Administrativo</footer>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbxqG3ObHOISMKQER5fwXCyC8EI9TKEKXCSeJqA4ubJc27ORgnJonaCjse6r6vkXHlG3_w/exec';
+
+/** ====== FORMATADORES ====== **/
+function formatarDataPlanilha(valor){
+  if(!valor) return '—';
+  // Se for número serial do Sheets
+  if(!isNaN(valor) && valor > 20000){
+    const d = new Date(Math.round((valor - 25569) * 86400 * 1000));
+    return d.toLocaleDateString('pt-BR');
+  }
+  // Se vier em texto ISO
+  if(String(valor).includes('T')){
+    const d = new Date(valor);
+    return d.toLocaleDateString('pt-BR');
+  }
+  // Se já vier no formato DD/MM/YYYY
+  if(valor.includes('/')) return valor;
+  return '—';
+}
+
+function formatarHoraPlanilha(valor){
+  if(!valor) return '—';
+  // ISO ou Date
+  if(String(valor).includes('T')){
+    const d = new Date(valor);
+    return d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  }
+  // Se vier tipo “19:40:00”
+  if(valor.includes(':')){
+    const [h,m] = valor.split(':');
+    return `${h.padStart(2,'0')}:${m.padStart(2,'0')}`;
+  }
+  return valor;
+}
+
+/** ====== LISTAGEM ====== **/
+async function carregarReservas(){
+  const lista=document.getElementById('lista');
+  try{
+    const res=await fetch(API_URL+'?acao=listar');
+    const reservas=await res.json();
+    lista.innerHTML='';
+    if(!reservas.length){
+      lista.innerHTML='<p style="text-align:center;color:#6b7280;">Nenhuma reserva encontrada.</p>';
+      return;
+    }
+reservas.forEach(r=>{
+  const card=document.createElement('div');
+  card.className='card';
+  const dataFmt=formatarDataPlanilha(r.data);
+  const horaFmt=formatarHoraPlanilha(r.horario);
+  const numeroLimpo = r.contato.replace(/\D/g,''); // remove espaços e símbolos
+  const linkWhats = `https://wa.me/${numeroLimpo}?text=Olá%20${encodeURIComponent(r.nome)},%20aqui%20é%20o%20Mercatto%20Delícia!%20🍽️%20Estamos%20entrando%20em%20contato%20sobre%20sua%20reserva.`;
+
+  card.innerHTML=`
+    <div class="nome">${r.nome}</div>
+    <div class="info">📅 ${dataFmt} • ⏰ ${horaFmt}</div>
+    <div class="info">👥 ${r.pessoas} pessoas • 📍 ${r.area}</div>
+    <div class="info">📞 ${r.contato}</div>
+    <div class="info">🎉 ${r.ocasiao}</div>
+    <div class="info">💬 ${r.obs || '—'}</div>
+    <div class="info">${statusBadge(r.status)}</div>
+    <div class="botoes">
+      <button class="btn" style="background:#25d366;" onclick="abrirWhats('${linkWhats}')"><span>WhatsApp</span></button>
+      ${r.status==='PENDENTE'?`
+      <button class="btn ok" onclick="atualizarStatus('${r.linha}','APROVADO',this)"><span>Aprovar</span></button>
+      <button class="btn no" onclick="atualizarStatus('${r.linha}','NEGADO',this)"><span>Negar</span></button>`:''}
+    </div>
+  `;
+  lista.appendChild(card);
+});
+
+  }catch(err){
+    lista.innerHTML='<p style="text-align:center;color:red;">Erro ao carregar reservas.</p>';
+    console.error(err);
+  }
+}
+
+function statusBadge(status){
+  if(status==='APROVADO')return`<span class="aprovado">APROVADO</span>`;
+  if(status==='NEGADO')return`<span class="negado">NEGADO</span>`;
+  return`<span class="pendente">PENDENTE</span>`;
+}
+
+/** ====== ATUALIZA STATUS ====== **/
+async function atualizarStatus(linha,novoStatus,btn){
+  if(!confirm(`Deseja marcar esta reserva como ${novoStatus}?`))return;
+  btn.classList.add('loading');
+  try{
+    const formData=new FormData();
+    formData.append('acao','atualizar');
+    formData.append('linha',linha);
+    formData.append('status',novoStatus);
+    await fetch(API_URL,{method:'POST',body:formData});
+    setTimeout(carregarReservas,800);
+  }catch(e){
+    alert('Erro ao atualizar status.');
+    console.error(e);
+  }finally{
+    btn.classList.remove('loading');
+  }
+}
+
+carregarReservas();
+  function abrirWhats(url){
+  window.open(url,'_blank');
+}
+
+</script>
+
+</body>
+</html>

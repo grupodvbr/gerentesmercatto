@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>✅ Check-list Diário</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0f19;--card:#151d2f;--accent:#ff8f1f;--accent2:#ffb347;
+  --text:#f8fafc;--muted:#94a3b8;--success:#22c55e;
+  --error:#ef4444;--shadow:0 4px 10px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;font-family:'Inter',sans-serif;background:var(--bg);
+  color:var(--text);min-height:100vh;display:flex;flex-direction:column;
+}
+header{
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  color:#000;text-align:center;padding:14px;font-weight:700;font-size:18px;
+  box-shadow:0 3px 8px rgba(0,0,0,.4);
+}
+.container{max-width:650px;margin:auto;padding:16px;width:100%;flex:1;}
+.section{
+  background:var(--card);border-radius:16px;padding:18px;
+  box-shadow:var(--shadow);margin-bottom:18px;
+}
+.item{
+  background:#1e293b;border-radius:10px;padding:10px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin:6px 0;transition:background .15s;
+}
+.item:hover{background:#25334e;}
+.done{color:var(--success);}
+.btn{
+  border:0;border-radius:8px;font-weight:600;
+  background:var(--accent);color:#000;cursor:pointer;
+  transition:.2s;font-size:13px;padding:6px 12px;min-width:90px;
+}
+.btn.small{font-size:13px;}
+.btn.done{background:var(--success)!important;color:#fff!important;}
+.btn:hover{background:var(--accent2);}
+.toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:var(--accent);color:#000;padding:10px 18px;border-radius:999px;
+  font-weight:600;box-shadow:var(--shadow);display:none;z-index:9999;
+}
+.overlay{
+  position:fixed;inset:0;background:#000d;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:600;font-size:18px;z-index:9999;
+}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:16px;}
+.popup-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  display:flex;align-items:center;justify-content:center;
+  z-index:10000;backdrop-filter:blur(2px);
+}
+.popup{
+  background:#1e293b;border-radius:12px;padding:20px;
+  max-width:420px;width:90%;box-shadow:0 4px 18px rgba(0,0,0,.6);
+  color:#fff;font-family:Inter,sans-serif;
+}
+.popup h3{text-align:center;margin:0 0 10px;color:#ffb347}
+.popup textarea{
+  width:100%;min-height:70px;margin-top:10px;border-radius:8px;
+  border:1px solid #334155;background:#0f172a;color:#fff;padding:8px;
+  resize:none;font-size:13px;
+}
+.popup button{
+  background:#ff8f1f;border:0;border-radius:8px;color:#000;
+  font-weight:600;padding:8px 14px;width:100%;margin-top:10px;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+<header>✅ Check-list Diário</header>
+
+<div class="overlay" id="overlay">Carregando...</div>
+
+<div class="container">
+  <div class="section" style="text-align:center">
+    <h3 id="empresaTitulo"></h3>
+    <p id="usuarioInfo" style="color:var(--muted);font-size:14px"></p>
+  </div>
+  <div class="section" id="listaChecklist"></div>
+
+  <div style="text-align:center;margin-top:20px">
+    <button class="btn" id="btnConcluir" onclick="abrirResumo()">✅ Concluir Check-list</button>
+  </div>
+
+  <div style="text-align:center;margin-top:20px">
+    <button class="btn" style="background:#334155;color:#fff" onclick="voltar()">⬅ Voltar</button>
+  </div>
+  <footer>©2025 Grupo Delícia & Mercatto</footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const GAS_URL='https://script.google.com/macros/s/AKfycbyGqW4R9pDnX19p4J8359Dt8F7qMwmRCqjNm_y1ZJUHUsO6hT6xONoXHasexSEnpCSH/exec';
+const $=s=>document.querySelector(s);
+
+let empresaAtual=localStorage.getItem('empresa')||'MERCATTO DELÍCIA';
+let gerenteAtual=localStorage.getItem('gerente')||'Gerente';
+$('#empresaTitulo').textContent=`Empresa: ${empresaAtual}`;
+$('#usuarioInfo').textContent=`Gerente: ${gerenteAtual}`;
+
+let checklistCache=[],historicoFiltrado=[];
+let carregando=false;
+
+/* ==== INÍCIO ==== */
+(async()=>{
+  await carregarChecklist(true);
+  // 🔁 Atualização automática a cada 5 segundos
+  setInterval(()=>carregarChecklist(false),5000);
+})();
+
+/* ==== CARREGAR ==== */
+async function carregarChecklist(showOverlay){
+  if(carregando)return;
+  carregando=true;
+  if(showOverlay)$('#overlay').style.display='flex';
+  try{
+    // Faz as duas consultas em paralelo
+    const [checklist, historico] = await Promise.all([
+      fetch(`${GAS_URL}?action=checklist&empresa=${encodeURIComponent(empresaAtual)}`).then(r=>r.json()),
+      fetch(`${GAS_URL}?action=historico&empresa=${encodeURIComponent(empresaAtual)}`).then(r=>r.json())
+    ]);
+    checklistCache = checklist || [];
+    const histEmp = (historico || []).filter(h=>h.empresa===empresaAtual);
+    const idx = histEmp.map(h=>h.tarefa).lastIndexOf('--- FIM DO CHECKLIST ---');
+    historicoFiltrado = idx>=0 ? histEmp.slice(idx+1) : histEmp;
+    renderChecklist();
+  }catch(err){
+    console.error(err);
+    toast('⚠️ Erro ao carregar dados.');
+  }finally{
+    $('#overlay').style.display='none';
+    carregando=false;
+  }
+}
+
+/* ==== RENDER ==== */
+function renderChecklist(){
+  const box=$('#listaChecklist');
+  if(!checklistCache.length){box.innerHTML='<p>Nenhuma tarefa cadastrada.</p>';return;}
+  const feitos=new Set(historicoFiltrado.filter(h=>String(h.status).toLowerCase().includes('feito')).map(h=>h.tarefa));
+  const html=checklistCache.map(t=>{
+    const done=feitos.has(t.tarefa);
+    return `<div class="item">
+      <div class="${done?'done':''}">${t.tarefa}</div>
+      <button class="btn small ${done?'done':''}" onclick="${done?'mostrarHistorico(\''+t.tarefa+'\')':'marcarFeito(this,\''+t.tarefa+'\')'}">
+        ${done?'CONCLUÍDA':'ok'}
+      </button>
+    </div>`;
+  }).join('');
+  box.innerHTML=html;
+}
+
+/* ==== MARCAR FEITO ==== */
+async function marcarFeito(btn,tarefa){
+  btn.textContent='CONCLUÍDA';btn.classList.add('done');btn.disabled=true;
+  try{
+    await fetch(GAS_URL,{method:'POST',body:JSON.stringify({
+      action:'registrarHistorico',
+      empresa:empresaAtual,
+      gerente:gerenteAtual,
+      tarefa,status:'Feito'
+    })});
+    toast('✅ '+tarefa+' feita');
+  }catch{toast('⚠️ Erro ao registrar tarefa.');}
+}
+
+/* ==== HISTÓRICO ==== */
+async function mostrarHistorico(tarefa){
+  $('#overlay').textContent='Carregando histórico...';$('#overlay').style.display='flex';
+  try{
+    const res=await fetch(`${GAS_URL}?action=historico&empresa=${encodeURIComponent(empresaAtual)}`);
+    const registros=await res.json();$('#overlay').style.display='none';
+    const hist=(registros||[]).filter(h=>h.tarefa===tarefa&&h.empresa===empresaAtual);
+    if(!hist.length)return toast('Sem registros.');
+    const html=hist.map(h=>`<li><strong>${h.gerente}</strong> • ${h.status}<br><small>${h.empresa} • ${h.data}</small></li>`).join('');
+    const p=document.createElement('div');
+    p.className='popup-bg';
+    p.innerHTML=`<div class="popup"><h3>📋 Histórico – ${tarefa}</h3><ul>${html}</ul><button onclick="this.closest('.popup-bg').remove()">Fechar</button></div>`;
+    document.body.appendChild(p);
+  }catch{$('#overlay').style.display='none';toast('Erro ao carregar histórico.');}
+}
+
+/* ==== CONCLUSÃO ==== */
+function abrirResumo(){
+  const total=checklistCache.length;
+  const feitos=new Set(historicoFiltrado.filter(h=>String(h.status).toLowerCase().includes('feito')).map(h=>h.tarefa));
+  const concluidas=feitos.size;
+  const faltam=total-concluidas;
+  const p=document.createElement('div');
+  p.className='popup-bg';
+  p.innerHTML=`
+    <div class="popup">
+      <h3>📊 Resumo que Leonardo receberá</h3>
+      <ul>
+        <li><b>Total:</b> ${total}</li>
+        <li><b>Concluídas:</b> ${concluidas}</li>
+        <li><b>Faltando:</b> ${faltam}</li>
+      </ul>
+      <textarea id="justificativa" placeholder="Justificativa (obrigatória se houver pendências)"></textarea>
+      <button onclick="confirmarConclusao(this,${concluidas},${faltam})">Confirmar Conclusão</button>
+      <button style='background:#334155;color:#fff' onclick="this.closest('.popup-bg').remove()">Cancelar</button>
+    </div>`;
+  document.body.appendChild(p);
+}
+
+/* ==== CONFIRMAR ==== */
+async function confirmarConclusao(btn,concluidas,faltam){
+  const j=document.getElementById('justificativa').value.trim();
+  if(faltam>0 && !j){toast('Justifique as pendências.');return;}
+  btn.disabled=true;btn.textContent='Processando...';
+  try{
+    await fetch(GAS_URL,{method:'POST',body:JSON.stringify({
+      action:'finalizarChecklist',
+      empresa:empresaAtual,
+      gerente:gerenteAtual,
+      justificativa:j,
+      concluidas:concluidas,
+      pendentes:faltam
+    })});
+    toast('🎯 Checklist finalizado.');
+    btn.closest('.popup-bg').remove();
+  }catch{
+    toast('Erro ao finalizar.');
+    btn.disabled=false;btn.textContent='Confirmar Conclusão';
+  }
+}
+
+/* ==== UTIL ==== */
+function voltar(){window.location.href='index.html';}
+function toast(msg){
+  const el=$('#toast');el.textContent=msg;el.style.display='block';
+  clearTimeout(el.timeout);el.timeout=setTimeout(()=>el.style.display='none',2000);
+}
+</script>
+</body>
+</html>

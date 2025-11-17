@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>🧭 Painel de Gerência</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0f19;--card:#131b2b;--accent:#ff8f1f;--accent2:#ffb347;
+  --text:#f1f5f9;--muted:#94a3b8;--shadow:0 4px 14px rgba(0,0,0,0.4);
+  --success:#22c55e;--error:#ef4444;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;font-family:'Inter',sans-serif;background:var(--bg);
+  color:var(--text);min-height:100vh;display:flex;flex-direction:column;
+}
+header{
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  color:#000;text-align:center;padding:16px;font-weight:700;font-size:18px;
+  letter-spacing:.3px;box-shadow:0 3px 10px rgba(0,0,0,.4);
+}
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:20px;}
+.section{
+  background:var(--card);border-radius:16px;padding:24px;
+  box-shadow:var(--shadow);width:100%;max-width:400px;text-align:center;
+}
+h2{margin-top:0;color:var(--accent2);font-weight:600;}
+.input,.select{
+  width:100%;padding:12px;border:0;border-radius:10px;margin:8px 0;
+  background:#1e293b;color:#fff;font-size:15px;outline:none;
+}
+.btn{
+  width:100%;padding:12px;margin-top:8px;border:0;border-radius:10px;
+  background:var(--accent);color:#000;font-weight:600;font-size:15px;
+  cursor:pointer;box-shadow:var(--shadow);transition:.2s;
+}
+.btn:hover{transform:scale(1.03);background:var(--accent2);}
+.error{color:var(--error);font-size:13px;height:16px;margin-top:4px;}
+.cards{
+  display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  margin-top:20px;text-align:center;
+}
+.card{
+  background:var(--card);padding:20px;border-radius:14px;
+  box-shadow:var(--shadow);cursor:pointer;transition:all .2s;
+}
+.card:hover{transform:translateY(-3px);background:#1c2540;}
+.card h3{margin:0;font-size:16px;color:var(--accent2);}
+.card p{margin:6px 0 0;font-size:13px;color:var(--muted);}
+.fadeIn{animation:fade .4s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:var(--accent);color:#000;padding:10px 20px;border-radius:999px;
+  font-weight:600;box-shadow:var(--shadow);display:none;
+}
+</style>
+</head>
+<body>
+<header>🧭 Painel de Gerência - Grupo Delícia & Mercatto</header>
+<main>
+  <!-- LOGIN -->
+  <div class="section fadeIn" id="loginBox">
+    <h2>Identificação</h2>
+    <select id="usuarioSelect" class="select">
+      <option value="">Selecione o gerente</option>
+      <option>MERCATTO_DHEURE</option>
+      <option>MERCATTO_YURI</option>
+      <option>MERCATTO_GLEIDSA</option>
+      <option>MERCATTO_JAQUELINE</option>
+      <option>MERCATTO_IVANIO</option>
+      <option>DELICIA_RUAN</option>
+      <option>DELICIA_VALCIR</option>
+    </select>
+    <input id="senha" type="password" class="input" placeholder="Senha de acesso">
+    <button class="btn" onclick="login()">Entrar</button>
+    <div class="error" id="loginMsg"></div>
+  </div>
+
+  <!-- HOME -->
+  <div class="section fadeIn" id="homeBox" style="display:none">
+    <h2 id="empresaNome"></h2>
+    <div class="cards">
+      <div class="card" onclick="abrir('checklist.html')">
+        <h3>✅ Check-list</h3><p>Tarefas diárias</p>
+      </div>
+      <div class="card" onclick="abrir('manutencoes.html')">
+        <h3>🧰 Manutenções</h3><p>Equipamentos</p>
+      </div>
+      <div class="card" onclick="abrir('desperdicios.html')">
+        <h3>🥣 Desperdícios</h3><p>Registrar sobras</p>
+      </div>
+      <div class="card" onclick="abrir('reservas.html')">
+        <h3>📅 Reservas</h3><p>Controle de reservas</p>
+      </div>
+        <div class="card" onclick="abrir('aniversarios.html')">
+        <h3>👍🏻 Aprovação de reservas</h3><p>Aprovação de reservas em geral</p>
+      </div>
+         <div class="card" onclick="abrir('curriculos.html')">
+        <h3>📘 Currículos</h3><p>Currículos recebidos</p>
+      </div>
+      <div class="card" onclick="abrir('links.html')">
+        <h3>🌐 Acessos</h3><p>Painéis úteis</p>
+      </div>
+    </div>
+    <button class="btn" style="margin-top:20px" onclick="logout()">Sair</button>
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const LOGIN_URL='https://gerentes.clena.com.br/api/login';
+const $=s=>document.querySelector(s);
+
+/* ✅ AUTOLOGIN SE TIVER CACHE */
+window.addEventListener('load',()=>{
+  const usuario=localStorage.getItem('usuario');
+  const empresa=localStorage.getItem('empresa');
+  const gerente=localStorage.getItem('gerente');
+  if(usuario&&empresa&&gerente){
+    $('#loginBox').style.display='none';
+    $('#homeBox').style.display='block';
+    $('#empresaNome').textContent=`${empresa} • ${gerente}`;
+    toast('👋 Bem-vindo de volta, '+gerente+'!');
+  }
+});
+
+/* LOGIN NORMAL */
+async function login(){
+  const usuario=$('#usuarioSelect').value.trim();
+  const senha=$('#senha').value.trim();
+  const msg=$('#loginMsg');
+  if(!usuario||!senha){msg.textContent='Preencha todos os campos.';return;}
+  msg.textContent='';
+
+  try{
+    const res=await fetch(`${LOGIN_URL}?usuario=${usuario}&senha=${senha}`);
+    const data=await res.json();
+
+    if(!data.success){
+      msg.textContent=data.msg||'Usuário ou senha incorretos.';
+      return;
+    }
+
+    // Extrai empresa e nome
+    const partes=usuario.split('_');
+    const empresa=partes[0].toUpperCase();
+    const gerente=partes[1] ? partes[1].charAt(0).toUpperCase()+partes[1].slice(1).toLowerCase() : 'Gerente';
+
+    // Nome de exibição da empresa
+    let empresaNomeDisplay = (empresa==='MERCATTO') ? 'MERCATTO DELÍCIA' : 'DELÍCIA GOURMET';
+    $('#empresaNome').textContent = `${empresaNomeDisplay} • ${gerente}`;
+
+    // Guarda no cache
+    localStorage.setItem('empresa', empresaNomeDisplay);
+    localStorage.setItem('gerente', gerente);
+    localStorage.setItem('usuario', usuario);
+
+    $('#loginBox').style.display='none';
+    $('#homeBox').style.display='block';
+    toast('👋 Bem-vindo, '+gerente+'!');
+  }catch{
+    msg.textContent='Erro de conexão. Tente novamente.';
+  }
+}
+
+/* ABRIR PÁGINAS */
+function abrir(pagina){window.location.href=pagina;}
+
+/* LOGOUT */
+function logout(){
+  localStorage.clear();
+  $('#homeBox').style.display='none';
+  $('#loginBox').style.display='block';
+  $('#senha').value='';
+  $('#usuarioSelect').value='';
+  toast('Sessão encerrada.');
+}
+
+/* TOAST */
+function toast(msg){
+  const el=$('#toast');
+  el.textContent=msg;
+  el.style.display='block';
+  setTimeout(()=>el.style.display='none',2500);
+}
+</script>
+</body>
+</html>

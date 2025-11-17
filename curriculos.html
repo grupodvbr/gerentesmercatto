@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>📂 Currículos Recebidos • RH Grupo DV</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0f19;--card:#151d2f;--accent:#ff8f1f;--accent2:#ffb347;
+  --text:#f8fafc;--muted:#94a3b8;--success:#22c55e;
+  --error:#ef4444;--shadow:0 4px 10px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;font-family:'Inter',sans-serif;background:var(--bg);
+  color:var(--text);min-height:100vh;display:flex;flex-direction:column;
+}
+header{
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  color:#000;text-align:center;padding:14px;font-weight:700;font-size:18px;
+  box-shadow:0 3px 8px rgba(0,0,0,.4);
+}
+.container{
+  flex:1;max-width:800px;width:100%;margin:auto;padding:16px;
+}
+.section{
+  background:var(--card);border-radius:16px;padding:18px;
+  box-shadow:var(--shadow);margin-bottom:18px;
+}
+.filters{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;}
+.filters input,.filters select{
+  flex:1;min-width:120px;padding:10px;border-radius:10px;border:1px solid #334155;
+  background:#1e293b;color:#fff;font-size:14px;
+}
+.filters button{
+  background:var(--accent);color:#000;border:0;border-radius:10px;padding:10px 14px;
+  font-weight:600;cursor:pointer;transition:.2s;min-width:100px;
+}
+.filters button:hover{background:var(--accent2);}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px;}
+th,td{padding:10px;border-bottom:1px solid #334155;text-align:left;}
+th{color:var(--muted);font-weight:600;}
+tr:hover{background:#1e293b;}
+.btn{
+  background:var(--accent);color:#000;border:0;border-radius:8px;
+  font-weight:600;padding:6px 10px;cursor:pointer;font-size:13px;
+}
+.btn:hover{background:var(--accent2);}
+.count{margin-top:10px;text-align:right;color:var(--muted);font-size:13px;}
+.toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:var(--accent);color:#000;padding:10px 18px;border-radius:999px;
+  font-weight:600;box-shadow:var(--shadow);display:none;z-index:9999;
+}
+.popup-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  display:flex;align-items:center;justify-content:center;
+  z-index:10000;backdrop-filter:blur(2px);
+}
+.popup{
+  background:#1e293b;border-radius:12px;padding:0;max-width:95%;width:800px;
+  height:90vh;box-shadow:0 4px 18px rgba(0,0,0,.6);display:flex;flex-direction:column;
+}
+.popup header{
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  color:#000;text-align:center;padding:10px;font-weight:700;
+}
+.popup iframe{
+  flex:1;width:100%;border:0;background:#000;
+}
+.popup button{
+  background:#334155;border:0;border-radius:0 0 12px 12px;
+  color:#fff;font-weight:600;padding:10px;cursor:pointer;width:100%;
+}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:16px;}
+@media(max-width:600px){
+  table,th,td{font-size:13px;}
+  th,td{padding:8px;}
+}
+</style>
+</head>
+<body>
+<header>📂 Currículos Recebidos</header>
+
+<div class="container">
+  <div class="section">
+    <div class="filters">
+      <input type="date" id="inicio">
+      <input type="date" id="fim">
+      <select id="filtroArea">
+        <option value="">Todas as áreas</option>
+      </select>
+      <button id="filtrar">Filtrar</button>
+    </div>
+    <table id="tabela">
+      <thead>
+        <tr><th>Data</th><th>Nome</th><th>Idade</th><th>Área</th><th>Currículo</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="count" id="count">Carregando...</div>
+  </div>
+  <footer>©2025 Grupo Delícia & Mercatto</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const ENDPOINT="https://script.google.com/macros/s/AKfycbxkkCeshRbjgBFw0CxCtidGMPfjMxJlewkVqnXpg1Vr44KJk0Ys18MPk-6k4fzpKoGl/exec";
+const tabela=document.querySelector("#tabela tbody");
+const count=document.querySelector("#count");
+const filtroArea=document.querySelector("#filtroArea");
+
+function toast(msg){
+  const t=document.querySelector("#toast");
+  t.textContent=msg;t.style.display='block';
+  clearTimeout(t._hide);t._hide=setTimeout(()=>t.style.display='none',2000);
+}
+
+function formatarData(iso){
+  try{
+    const d=new Date(iso);
+    if(isNaN(d)) return iso;
+    const dd=String(d.getDate()).padStart(2,'0');
+    const mm=String(d.getMonth()+1).padStart(2,'0');
+    const yyyy=d.getFullYear();
+    const hh=String(d.getHours()).padStart(2,'0');
+    const min=String(d.getMinutes()).padStart(2,'0');
+    return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
+  }catch{return iso;}
+}
+
+async function carregar(){
+  tabela.innerHTML="";count.textContent="Carregando...";
+  try{
+    const res=await fetch(ENDPOINT+"?acao=listar");
+    const data=await res.json();
+    if(!Array.isArray(data)) throw new Error("Formato inválido");
+    const areas=[...new Set(data.map(r=>r[4]).filter(Boolean))];
+    filtroArea.innerHTML='<option value="">Todas as áreas</option>'+areas.map(a=>`<option>${a}</option>`).join('');
+    render(data);
+  }catch(e){count.textContent="Erro: "+e.message;}
+}
+
+function render(dados){
+  const inicio=document.querySelector("#inicio").value;
+  const fim=document.querySelector("#fim").value;
+  const area=filtroArea.value;
+  let arr=dados;
+  if(inicio)arr=arr.filter(r=>new Date(r[1])>=new Date(inicio));
+  if(fim)arr=arr.filter(r=>new Date(r[1])<=new Date(fim+"T23:59"));
+  if(area)arr=arr.filter(r=>(r[4]||"").toLowerCase()==area.toLowerCase());
+  tabela.innerHTML=arr.map(r=>{
+    const dt=formatarData(r[1]),nome=r[2],idade=r[3]||"-",a=r[4]||"-",link=r[5];
+    return `<tr>
+      <td>${dt}</td>
+      <td>${nome}</td>
+      <td>${idade}</td>
+      <td>${a}</td>
+      <td><button class="btn" onclick="abrir('${link}','${nome}')">📄 Ver</button></td>
+    </tr>`;
+  }).join('');
+  count.textContent=arr.length+" currículo(s) exibido(s)";
+}
+
+function abrir(link,nome){
+  const bg=document.createElement('div');
+  bg.className='popup-bg';
+  bg.innerHTML=`
+    <div class="popup">
+      <header>${nome}</header>
+      <iframe src="${link.replace('/view','/preview')}" allowfullscreen></iframe>
+      <button onclick="this.closest('.popup-bg').remove()">Fechar</button>
+    </div>`;
+  document.body.appendChild(bg);
+}
+
+document.querySelector("#filtrar").addEventListener("click",()=>carregar());
+window.addEventListener("DOMContentLoaded",carregar);
+</script>
+</body>
+</html>
