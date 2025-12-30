@@ -112,7 +112,7 @@ h2{margin:0 0 14px;color:var(--accent2)}
 /* ================= SUPABASE ================= */
 const SUPABASE_URL = 'https://qkuilafoughsaykttjsc.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_SCIIYvHVkFxUIs28r9Tw0A_jJEgCO3g';
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /* ================= HELPERS ================= */
 const $ = s => document.querySelector(s);
@@ -129,7 +129,6 @@ function login(){
   }
 
   const [empresaCod, nome] = usuario.split('_');
-
   const empresa =
     empresaCod === 'MERCATTO'
       ? 'MERCATTO DELÍCIA'
@@ -172,38 +171,34 @@ async function carregarKPIs(){
 }
 
 async function kpiChecklists(){
-  const { count } = await supabase
+  const { count } = await sb
     .from('checklists')
     .select('*',{ count:'exact', head:true })
     .eq('data', hoje());
-
   $('#kpiChecklist').textContent = count ?? 0;
 }
 
 async function kpiManutencoes(){
-  const { count } = await supabase
+  const { count } = await sb
     .from('manutencoes')
     .select('*',{ count:'exact', head:true })
     .eq('status','aberto');
-
   $('#kpiManutencao').textContent = count ?? 0;
 }
 
 async function kpiDesperdicios(){
-  const { data } = await supabase
+  const { data } = await sb
     .from('desperdicios')
     .select('quantidade');
-
-  const total = (data || []).reduce((s,i)=>s+Number(i.quantidade),0);
+  const total = (data||[]).reduce((s,i)=>s+Number(i.quantidade),0);
   $('#kpiDesperdicio').textContent = total.toFixed(1);
 }
 
 async function kpiReservas(){
-  const { count } = await supabase
+  const { count } = await sb
     .from('reservas')
     .select('*',{ count:'exact', head:true })
     .eq('data', hoje());
-
   $('#kpiReservas').textContent = count ?? 0;
 }
 
