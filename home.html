@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ff8f1f">
+
+<title>Painel de Gerência</title>
+
+<link rel="apple-touch-icon" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0b0f19;
+  --card:#121826;
+  --accent:#ff8f1f;
+  --accent2:#ffb347;
+  --text:#f1f5f9;
+  --muted:#94a3b8;
+  --shadow:0 10px 30px rgba(0,0,0,.45);
+  --radius:18px;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
+  background:linear-gradient(180deg,#020617,#0b0f19);
+  color:var(--text);
+  min-height:100vh;
+}
+
+header{
+  position:sticky;
+  top:0;
+  z-index:10;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  color:#000;
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.header-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+header img{
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  background:#000;
+}
+
+header h1{
+  font-size:16px;
+  margin:0;
+  font-weight:700;
+}
+
+.logout{
+  background:#000;
+  color:#fff;
+  border:0;
+  padding:8px 12px;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+main{
+  padding:20px;
+  max-width:1200px;
+  margin:auto;
+}
+
+.info{
+  margin-bottom:18px;
+}
+
+.info h2{
+  margin:0;
+  font-size:18px;
+}
+
+.info p{
+  margin:4px 0 0;
+  font-size:13px;
+  color:var(--muted);
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:16px;
+}
+
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:20px;
+  cursor:pointer;
+  transition:.2s;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+.card:hover{
+  transform:translateY(-4px);
+  background:#1c2540;
+}
+
+.card span{
+  font-size:26px;
+}
+
+.card h3{
+  margin:10px 0 4px;
+  font-size:16px;
+  color:var(--accent2);
+}
+
+.card p{
+  margin:0;
+  font-size:13px;
+  color:var(--muted);
+}
+
+.footer{
+  text-align:center;
+  font-size:11px;
+  color:var(--muted);
+  margin-top:30px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-left">
+    <img src="logo.png" alt="Logo">
+    <h1>Painel de Gerência</h1>
+  </div>
+  <button class="logout" onclick="logout()">Sair</button>
+</header>
+
+<main>
+
+  <div class="info">
+    <h2 id="empresa"></h2>
+    <p id="gerente"></p>
+  </div>
+
+  <div class="cards">
+
+    <div class="card" onclick="abrir('checklist.html')">
+      <span>✅</span>
+      <h3>Check-list</h3>
+      <p>Tarefas diárias</p>
+    </div>
+
+    <div class="card" onclick="abrir('manutencoes.html')">
+      <span>🧰</span>
+      <h3>Manutenções</h3>
+      <p>Equipamentos</p>
+    </div>
+
+    <div class="card" onclick="abrir('desperdicios.html')">
+      <span>🥣</span>
+      <h3>Desperdícios</h3>
+      <p>Controle de perdas</p>
+    </div>
+
+    <div class="card" onclick="abrir('reservas.html')">
+      <span>📅</span>
+      <h3>Reservas</h3>
+      <p>Agendamentos</p>
+    </div>
+
+    <div class="card" onclick="abrir('curriculos.html')">
+      <span>📘</span>
+      <h3>Currículos</h3>
+      <p>RH</p>
+    </div>
+
+    <div class="card" onclick="abrir('links.html')">
+      <span>🌐</span>
+      <h3>Acessos</h3>
+      <p>Painéis úteis</p>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    © Grupo DV • Uso interno
+  </div>
+
+</main>
+
+<script>
+/* ================= PROTEÇÃO ================= */
+window.onload = ()=>{
+  const empresa = localStorage.getItem('empresa');
+  const gerente = localStorage.getItem('gerente');
+
+  if(!empresa || !gerente){
+    window.location.href = 'index.html';
+    return;
+  }
+
+  document.getElementById('empresa').textContent = empresa;
+  document.getElementById('gerente').textContent = `Gerente: ${gerente}`;
+};
+
+/* ================= AÇÕES ================= */
+function abrir(pagina){
+  window.location.href = pagina;
+}
+
+function logout(){
+  localStorage.clear();
+  window.location.href = 'index.html';
+}
+</script>
+
+</body>
+</html>
