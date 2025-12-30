@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ff8f1f">
-
 <title>Check-list Diário</title>
 
 <link rel="apple-touch-icon" href="logo.png">
@@ -34,6 +33,7 @@ body{
 header{
   position:sticky;
   top:0;
+  z-index:10;
   background:linear-gradient(90deg,var(--accent),var(--accent2));
   color:#000;
   padding:14px 16px;
@@ -41,7 +41,7 @@ header{
   align-items:center;
   justify-content:space-between;
 }
-header h1{font-size:16px;margin:0}
+header h1{margin:0;font-size:16px}
 header button{
   background:#000;
   color:#fff;
@@ -55,69 +55,69 @@ main{
   max-width:900px;
   margin:auto;
 }
-.section{
+
+.task{
   background:var(--card);
   border-radius:var(--radius);
   box-shadow:var(--shadow);
-  padding:18px;
-  margin-bottom:18px;
+  padding:16px;
+  margin-bottom:14px;
 }
-.section h2{
-  margin:0 0 12px;
-  color:var(--accent2);
-  font-size:16px;
+.task-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
 }
-select,input,textarea{
-  width:100%;
+.task-title{
+  font-weight:600;
+  font-size:15px;
+}
+.camera{
+  background:#000;
+  border-radius:50%;
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+.camera span{
+  font-size:20px;
+}
+.actions{
+  display:flex;
+  gap:10px;
+  margin-top:12px;
+}
+.actions button{
+  flex:1;
   padding:12px;
+  border-radius:12px;
+  border:0;
+  font-weight:700;
+  cursor:pointer;
+}
+.ok{background:#22c55e;color:#000}
+.no{background:#ef4444;color:#000}
+textarea{
+  width:100%;
+  margin-top:10px;
+  padding:10px;
   border-radius:12px;
   border:0;
   background:#020617;
   color:#fff;
-  margin-bottom:10px;
+  resize:none;
   font-size:14px;
 }
-textarea{resize:none}
-button.primary{
-  width:100%;
-  padding:14px;
-  border-radius:14px;
-  border:0;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-  font-weight:700;
-  color:#000;
+small{
+  color:var(--muted);
+  font-size:12px;
+  display:block;
+  margin-top:6px;
 }
-.item{
-  display:flex;
-  flex-direction:column;
-  background:#0f172a;
-  padding:14px;
-  border-radius:14px;
-  margin-bottom:12px;
-}
-.item-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.item strong{font-size:14px}
-.badge-ok{color:var(--success)}
-.badge-no{color:var(--error)}
-.actions{
-  display:flex;
-  gap:10px;
-  margin-top:10px;
-}
-.actions button{
-  flex:1;
-  padding:10px;
-  border-radius:10px;
-  border:0;
-  font-weight:600;
-}
-.ok{background:#16a34a;color:#000}
-.no{background:#ef4444;color:#000}
-small{color:var(--muted)}
 </style>
 </head>
 
@@ -128,28 +128,7 @@ small{color:var(--muted)}
   <button onclick="voltar()">Voltar</button>
 </header>
 
-<main>
-
-  <!-- NOVO CHECKLIST -->
-  <div class="section">
-    <h2>Novo Check-list</h2>
-
-    <select id="periodo">
-      <option value="">Período</option>
-      <option value="abertura">Abertura</option>
-      <option value="fechamento">Fechamento</option>
-    </select>
-
-    <button class="primary" onclick="criarChecklist()">Criar Check-list</button>
-  </div>
-
-  <!-- LISTA -->
-  <div class="section">
-    <h2>Check-lists de Hoje</h2>
-    <div id="lista"></div>
-  </div>
-
-</main>
+<main id="lista"></main>
 
 <script>
 /* ================= PROTEÇÃO ================= */
@@ -164,107 +143,101 @@ const SUPABASE_URL = 'https://qkuilafoughsaykttjsc.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_SCIIYvHVkFxUIs28r9Tw0A_jJEgCO3g';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* ================= HELPERS ================= */
-const hoje = () => new Date().toISOString().slice(0,10);
-const $ = s => document.querySelector(s);
+/* ================= VARS ================= */
+const periodo = 'abertura'; // depois você pode escolher
+let arquivos = {}; // guarda fotos temporárias
 
-/* ================= CRIAR ================= */
-async function criarChecklist(){
-  const periodo = $('#periodo').value;
-  if(!periodo) return alert('Selecione o período');
-
-  const { data, error } = await sb
-    .from('checklists')
-    .insert({
-      empresa,
-      gerente,
-      data: hoje(),
-      periodo
-    })
-    .select()
-    .single();
-
-  if(error){
-    alert('Erro ao criar checklist');
-    console.error(error);
-    return;
-  }
-
-  // itens padrão (exemplo)
-  const itens = [
-    'Limpeza geral',
-    'Equipamentos ligados',
-    'Freezers funcionando',
-    'Estoque organizado',
-    'Equipe completa'
-  ];
-
-  const payload = itens.map(i=>({
-    checklist_id: data.id,
-    item: i,
-    status: 'ok'
-  }));
-
-  await sb.from('checklist_itens').insert(payload);
-
-  $('#periodo').value = '';
-  carregar();
-}
-
-/* ================= LISTAR ================= */
+/* ================= LOAD BASE ================= */
 async function carregar(){
   const { data, error } = await sb
-    .from('checklists')
-    .select(`
-      id,periodo,gerente,
-      checklist_itens(id,item,status,observacao)
-    `)
-    .eq('data', hoje())
-    .order('criado_em',{ascending:false});
+    .from('checklist_base')
+    .select('*')
+    .eq('empresa', empresa)
+    .eq('periodo', periodo)
+    .eq('ativo', true)
+    .order('item');
 
   if(error){
+    alert('Erro ao carregar checklist');
     console.error(error);
     return;
   }
 
-  const lista = $('#lista');
+  render(data);
+}
+
+/* ================= RENDER ================= */
+function render(itens){
+  const lista = document.getElementById('lista');
   lista.innerHTML = '';
 
-  data.forEach(c=>{
-    c.checklist_itens.forEach(i=>{
-      const div = document.createElement('div');
-      div.className = 'item';
-      div.innerHTML = `
-        <div class="item-top">
-          <strong>${i.item}</strong>
-          <small>${c.periodo}</small>
-        </div>
+  itens.forEach(i=>{
+    const div = document.createElement('div');
+    div.className = 'task';
+    div.innerHTML = `
+      <div class="task-top">
+        <div class="task-title">${i.item}</div>
+        <label class="camera">
+          <span>📷</span>
+          <input type="file" accept="image/*" capture="environment"
+            style="display:none"
+            onchange="selecionar('${i.id}',this)">
+        </label>
+      </div>
 
-        <small class="${i.status==='ok'?'badge-ok':'badge-no'}">
-          ${i.status==='ok'?'OK':'NÃO OK'}
-        </small>
+      <textarea placeholder="Observação (opcional)"
+        id="obs_${i.id}"></textarea>
 
-        <textarea placeholder="Observação"
-          onblur="obs('${i.id}',this.value)">${i.observacao||''}</textarea>
+      <div class="actions">
+        <button class="ok" onclick="salvar('${i.id}','${i.item}','ok')">OK</button>
+        <button class="no" onclick="salvar('${i.id}','${i.item}','nao_ok')">NÃO OK</button>
+      </div>
 
-        <div class="actions">
-          <button class="ok" onclick="status('${i.id}','ok')">OK</button>
-          <button class="no" onclick="status('${i.id}','nao_ok')">Não OK</button>
-        </div>
-      `;
-      lista.appendChild(div);
-    });
+      <small id="status_${i.id}"></small>
+    `;
+    lista.appendChild(div);
   });
 }
 
-/* ================= ATUALIZAR ================= */
-async function status(id,st){
-  await sb.from('checklist_itens').update({status:st}).eq('id',id);
-  carregar();
+/* ================= FOTO ================= */
+function selecionar(id,input){
+  arquivos[id] = input.files[0];
 }
 
-async function obs(id,txt){
-  await sb.from('checklist_itens').update({observacao:txt}).eq('id',id);
+/* ================= SALVAR ================= */
+async function salvar(baseId,item,status){
+  const obs = document.getElementById('obs_'+baseId).value;
+  let anexo = null;
+
+  if(arquivos[baseId]){
+    const nome = `${empresa}/${Date.now()}_${arquivos[baseId].name}`;
+    const { error } = await sb
+      .storage
+      .from('checklist-anexos')
+      .upload(nome, arquivos[baseId]);
+
+    if(!error){
+      anexo = sb
+        .storage
+        .from('checklist-anexos')
+        .getPublicUrl(nome).data.publicUrl;
+    }
+  }
+
+  await sb.from('checklist_registros').upsert({
+    checklist_base_id: baseId,
+    empresa,
+    periodo,
+    item,
+    status,
+    observacao: obs,
+    anexo_url: anexo,
+    feito_por: gerente,
+    data_hora: new Date().toISOString()
+  });
+
+  document.getElementById('status_'+baseId)
+    .textContent = `✔ ${status.toUpperCase()} • ${new Date().toLocaleString()}`;
 }
 
 /* ================= NAV ================= */
