@@ -11,7 +11,7 @@
 <style>
 :root{
   --bg:#0b0f19;--card:#131b2b;--accent:#ff8f1f;--accent2:#ffb347;
-  --text:#f1f5f9;--muted:#94a3b8;--success:#22c55e;--error:#ef4444;
+  --text:#f1f5f9;--muted:#94a3b8;--error:#ef4444;
   --shadow:0 4px 14px rgba(0,0,0,.45);
 }
 *{box-sizing:border-box}
@@ -42,18 +42,16 @@ h2{margin:0 0 14px;color:var(--accent2)}
 .error{color:var(--error);font-size:13px}
 
 .cards{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
   gap:16px;margin-top:10px;
 }
 .card{
   background:#0f172a;border-radius:14px;padding:16px;
   box-shadow:var(--shadow);
 }
-.card h3{margin:0;color:var(--accent2)}
+.card h3{margin:0;color:var(--accent2);font-size:22px}
 .card p{margin:6px 0 0;color:var(--muted);font-size:13px}
-
-.fade{animation:fade .3s ease}
-@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
 </style>
 </head>
 
@@ -63,28 +61,29 @@ h2{margin:0 0 14px;color:var(--accent2)}
 <main>
 
 <!-- LOGIN -->
-<div class="section fade" id="loginBox">
+<div class="section" id="loginBox">
   <h2>Identificação</h2>
+
   <select id="usuario" class="select">
     <option value="">Selecione</option>
-      <option>MERCATTO_DHEURE</option>
-      <option>MERCATTO_YURI</option>
-      <option>MERCATTO_GLEIDSA</option>
-      <option>MERCATTO_JAQUELINE</option>
-      <option>MERCATTO_IVANIO</option>
-      <option>DELICIA_RUAN</option>
-      <option>DELICIA_VALCIR</option>
+    <option>MERCATTO_DHEURE</option>
+    <option>MERCATTO_YURI</option>
+    <option>MERCATTO_GLEIDSA</option>
+    <option>MERCATTO_JAQUELINE</option>
+    <option>MERCATTO_IVANIO</option>
+    <option>DELICIA_RUAN</option>
+    <option>DELICIA_VALCIR</option>
   </select>
+
   <input id="senha" class="input" type="password" placeholder="Senha">
   <button class="btn" onclick="login()">Entrar</button>
   <div class="error" id="loginMsg"></div>
 </div>
 
 <!-- DASHBOARD -->
-<div class="section fade" id="dashBox" style="display:none">
+<div class="section" id="dashBox" style="display:none">
   <h2 id="empresaTitulo"></h2>
 
-  <!-- KPIs -->
   <div class="cards">
     <div class="card">
       <h3 id="kpiChecklist">–</h3>
@@ -96,7 +95,7 @@ h2{margin:0 0 14px;color:var(--accent2)}
     </div>
     <div class="card">
       <h3 id="kpiDesperdicio">–</h3>
-      <p>Desperdício (período)</p>
+      <p>Desperdício</p>
     </div>
     <div class="card">
       <h3 id="kpiReservas">–</h3>
@@ -123,22 +122,37 @@ const hoje = () => new Date().toISOString().slice(0,10);
 function login(){
   const usuario = $('#usuario').value;
   const senha = $('#senha').value;
+
   if(!usuario || !senha){
-    $('#loginMsg').textContent='Preencha tudo';
+    $('#loginMsg').textContent = 'Preencha usuário e senha';
     return;
   }
 
-  const [empresa, nome] = usuario.split('_');
-  const empresaNome = empresa === 'MERCATTO' ? 'MERCATTO DELÍCIA' : 'DELÍCIA GOURMET';
+  const [empresaCod, nome] = usuario.split('_');
 
-  localStorage.setItem('empresa', empresaNome);
+  const empresa =
+    empresaCod === 'MERCATTO'
+      ? 'MERCATTO DELÍCIA'
+      : 'DELÍCIA GOURMET';
+
+  localStorage.setItem('empresa', empresa);
   localStorage.setItem('gerente', nome);
 
-  $('#empresaTitulo').textContent = `${empresaNome} • ${nome}`;
-  $('#loginBox').style.display='none';
-  $('#dashBox').style.display='block';
+  abrirPainel();
+}
 
-  loadKPIs();
+/* ================= ABRIR PAINEL ================= */
+function abrirPainel(){
+  const empresa = localStorage.getItem('empresa');
+  const gerente = localStorage.getItem('gerente');
+
+  if(!empresa || !gerente) return;
+
+  $('#empresaTitulo').textContent = `${empresa} • ${gerente}`;
+  $('#loginBox').style.display = 'none';
+  $('#dashBox').style.display = 'block';
+
+  carregarKPIs();
 }
 
 /* ================= LOGOUT ================= */
@@ -148,7 +162,7 @@ function logout(){
 }
 
 /* ================= KPIs ================= */
-async function loadKPIs(){
+async function carregarKPIs(){
   await Promise.all([
     kpiChecklists(),
     kpiManutencoes(),
@@ -160,16 +174,18 @@ async function loadKPIs(){
 async function kpiChecklists(){
   const { count } = await supabase
     .from('checklists')
-    .select('*',{count:'exact',head:true})
-    .eq('data',hoje());
+    .select('*',{ count:'exact', head:true })
+    .eq('data', hoje());
+
   $('#kpiChecklist').textContent = count ?? 0;
 }
 
 async function kpiManutencoes(){
   const { count } = await supabase
     .from('manutencoes')
-    .select('*',{count:'exact',head:true})
+    .select('*',{ count:'exact', head:true })
     .eq('status','aberto');
+
   $('#kpiManutencao').textContent = count ?? 0;
 }
 
@@ -177,29 +193,22 @@ async function kpiDesperdicios(){
   const { data } = await supabase
     .from('desperdicios')
     .select('quantidade');
-  const total = (data||[]).reduce((s,i)=>s+Number(i.quantidade),0);
+
+  const total = (data || []).reduce((s,i)=>s+Number(i.quantidade),0);
   $('#kpiDesperdicio').textContent = total.toFixed(1);
 }
 
 async function kpiReservas(){
   const { count } = await supabase
     .from('reservas')
-    .select('*',{count:'exact',head:true})
-    .eq('data',hoje());
+    .select('*',{ count:'exact', head:true })
+    .eq('data', hoje());
+
   $('#kpiReservas').textContent = count ?? 0;
 }
 
 /* ================= AUTOLOGIN ================= */
-window.onload = ()=>{
-  const empresa = localStorage.getItem('empresa');
-  const gerente = localStorage.getItem('gerente');
-  if(empresa && gerente){
-    $('#empresaTitulo').textContent = `${empresa} • ${gerente}`;
-    $('#loginBox').style.display='none';
-    $('#dashBox').style.display='block';
-    loadKPIs();
-  }
-};
+window.onload = abrirPainel;
 </script>
 
 </body>
