@@ -2,129 +2,168 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>🧭 Painel de Gerência</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ff8f1f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Painel Gerência">
 
+<title>Painel de Gerência</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="logo.png">
+
+<!-- FONT -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
-  --bg:#0b0f19;--card:#131b2b;--accent:#ff8f1f;--accent2:#ffb347;
-  --text:#f1f5f9;--muted:#94a3b8;--error:#ef4444;
-  --shadow:0 4px 14px rgba(0,0,0,.45);
+  --bg:#0b0f19;
+  --card:#121826;
+  --accent:#ff8f1f;
+  --accent2:#ffb347;
+  --text:#f1f5f9;
+  --muted:#94a3b8;
+  --error:#ef4444;
+  --radius:18px;
+  --shadow:0 10px 30px rgba(0,0,0,.5);
 }
+
 *{box-sizing:border-box}
 body{
-  margin:0;font-family:Inter,Arial;background:var(--bg);color:var(--text);
-  min-height:100vh;display:flex;flex-direction:column;
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont;
+  background:linear-gradient(180deg,#0b0f19,#020617);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-header{
-  position:sticky;top:0;z-index:10;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-  color:#000;padding:14px;text-align:center;font-weight:700;
-}
-main{flex:1;padding:20px;max-width:1200px;margin:auto;width:100%}
-.section{
-  background:var(--card);border-radius:16px;padding:24px;
-  box-shadow:var(--shadow);margin-bottom:20px;
-}
-h2{margin:0 0 14px;color:var(--accent2)}
-.input,.select{
-  width:100%;padding:12px;border-radius:10px;border:0;
-  background:#1e293b;color:#fff;margin-bottom:10px;
-}
-.btn{
-  padding:12px 16px;border-radius:10px;border:0;
-  background:var(--accent);font-weight:700;cursor:pointer;
-}
-.btn:hover{background:var(--accent2)}
-.error{color:var(--error);font-size:13px}
 
-.cards{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-  gap:16px;margin-top:10px;
+.container{
+  width:100%;
+  max-width:420px;
+  padding:24px;
 }
+
 .card{
-  background:#0f172a;border-radius:14px;padding:16px;
+  background:var(--card);
+  border-radius:var(--radius);
   box-shadow:var(--shadow);
+  padding:28px;
+  text-align:center;
 }
-.card h3{margin:0;color:var(--accent2);font-size:22px}
-.card p{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+.logo{
+  width:90px;
+  height:90px;
+  border-radius:20px;
+  margin:0 auto 16px;
+  display:block;
+  object-fit:contain;
+  background:#000;
+}
+
+h1{
+  font-size:20px;
+  margin:0 0 4px;
+  font-weight:700;
+}
+
+.subtitle{
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:24px;
+}
+
+select,input{
+  width:100%;
+  padding:14px;
+  border-radius:14px;
+  border:0;
+  background:#020617;
+  color:#fff;
+  margin-bottom:12px;
+  font-size:15px;
+}
+
+input::placeholder{color:#64748b}
+
+button{
+  width:100%;
+  padding:14px;
+  border-radius:14px;
+  border:0;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  font-weight:700;
+  font-size:16px;
+  cursor:pointer;
+  color:#000;
+}
+
+button:active{transform:scale(.98)}
+
+.error{
+  font-size:13px;
+  color:var(--error);
+  margin-top:10px;
+  min-height:16px;
+}
+
+.footer{
+  margin-top:18px;
+  font-size:11px;
+  color:var(--muted);
+}
 </style>
 </head>
 
 <body>
-<header>🧭 Painel de Gerência</header>
 
-<main>
+<div class="container">
+  <div class="card">
 
-<!-- LOGIN -->
-<div class="section" id="loginBox">
-  <h2>Identificação</h2>
+    <!-- LOGO -->
+    <img src="logo.png" class="logo" alt="Logo">
 
-  <select id="usuario" class="select">
-    <option value="">Selecione</option>
-    <option>MERCATTO_DHEURE</option>
-    <option>MERCATTO_YURI</option>
-    <option>MERCATTO_GLEIDSA</option>
-    <option>MERCATTO_JAQUELINE</option>
-    <option>MERCATTO_IVANIO</option>
-    <option>DELICIA_RUAN</option>
-    <option>DELICIA_VALCIR</option>
-  </select>
+    <h1>Painel de Gerência</h1>
+    <div class="subtitle">Grupo Delícia & Mercatto</div>
 
-  <input id="senha" class="input" type="password" placeholder="Senha">
-  <button class="btn" onclick="login()">Entrar</button>
-  <div class="error" id="loginMsg"></div>
-</div>
+    <!-- LOGIN -->
+    <select id="usuario">
+      <option value="">Selecione o gerente</option>
+      <option>MERCATTO_DHEURE</option>
+      <option>MERCATTO_YURI</option>
+      <option>MERCATTO_GLEIDSA</option>
+      <option>MERCATTO_JAQUELINE</option>
+      <option>MERCATTO_IVANIO</option>
+      <option>DELICIA_RUAN</option>
+      <option>DELICIA_VALCIR</option>
+    </select>
 
-<!-- DASHBOARD -->
-<div class="section" id="dashBox" style="display:none">
-  <h2 id="empresaTitulo"></h2>
+    <input id="senha" type="password" placeholder="Senha de acesso">
 
-  <div class="cards">
-    <div class="card">
-      <h3 id="kpiChecklist">–</h3>
-      <p>Checklists hoje</p>
-    </div>
-    <div class="card">
-      <h3 id="kpiManutencao">–</h3>
-      <p>Manutenções abertas</p>
-    </div>
-    <div class="card">
-      <h3 id="kpiDesperdicio">–</h3>
-      <p>Desperdício</p>
-    </div>
-    <div class="card">
-      <h3 id="kpiReservas">–</h3>
-      <p>Reservas hoje</p>
+    <button onclick="login()">Entrar</button>
+
+    <div class="error" id="msg"></div>
+
+    <div class="footer">
+      © Grupo DV • Acesso restrito
     </div>
   </div>
-
-  <button class="btn" style="margin-top:20px" onclick="logout()">Sair</button>
 </div>
 
-</main>
-
 <script>
-/* ================= SUPABASE ================= */
-const SUPABASE_URL = 'https://qkuilafoughsaykttjsc.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_SCIIYvHVkFxUIs28r9Tw0A_jJEgCO3g';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-/* ================= HELPERS ================= */
-const $ = s => document.querySelector(s);
-const hoje = () => new Date().toISOString().slice(0,10);
-
 /* ================= LOGIN ================= */
 function login(){
-  const usuario = $('#usuario').value;
-  const senha = $('#senha').value;
+  const usuario = document.getElementById('usuario').value;
+  const senha = document.getElementById('senha').value;
+  const msg = document.getElementById('msg');
 
   if(!usuario || !senha){
-    $('#loginMsg').textContent = 'Preencha usuário e senha';
+    msg.textContent = 'Preencha usuário e senha';
     return;
   }
 
@@ -137,73 +176,20 @@ function login(){
   localStorage.setItem('empresa', empresa);
   localStorage.setItem('gerente', nome);
 
-  abrirPainel();
-}
-
-/* ================= ABRIR PAINEL ================= */
-function abrirPainel(){
-  const empresa = localStorage.getItem('empresa');
-  const gerente = localStorage.getItem('gerente');
-
-  if(!empresa || !gerente) return;
-
-  $('#empresaTitulo').textContent = `${empresa} • ${gerente}`;
-  $('#loginBox').style.display = 'none';
-  $('#dashBox').style.display = 'block';
-
-  carregarKPIs();
-}
-
-/* ================= LOGOUT ================= */
-function logout(){
-  localStorage.clear();
-  location.reload();
-}
-
-/* ================= KPIs ================= */
-async function carregarKPIs(){
-  await Promise.all([
-    kpiChecklists(),
-    kpiManutencoes(),
-    kpiDesperdicios(),
-    kpiReservas()
-  ]);
-}
-
-async function kpiChecklists(){
-  const { count } = await sb
-    .from('checklists')
-    .select('*',{ count:'exact', head:true })
-    .eq('data', hoje());
-  $('#kpiChecklist').textContent = count ?? 0;
-}
-
-async function kpiManutencoes(){
-  const { count } = await sb
-    .from('manutencoes')
-    .select('*',{ count:'exact', head:true })
-    .eq('status','aberto');
-  $('#kpiManutencao').textContent = count ?? 0;
-}
-
-async function kpiDesperdicios(){
-  const { data } = await sb
-    .from('desperdicios')
-    .select('quantidade');
-  const total = (data||[]).reduce((s,i)=>s+Number(i.quantidade),0);
-  $('#kpiDesperdicio').textContent = total.toFixed(1);
-}
-
-async function kpiReservas(){
-  const { count } = await sb
-    .from('reservas')
-    .select('*',{ count:'exact', head:true })
-    .eq('data', hoje());
-  $('#kpiReservas').textContent = count ?? 0;
+  window.location.href = 'home.html';
 }
 
 /* ================= AUTOLOGIN ================= */
-window.onload = abrirPainel;
+window.onload = ()=>{
+  if(localStorage.getItem('empresa') && localStorage.getItem('gerente')){
+    window.location.href = 'home.html';
+  }
+};
+
+/* ================= SERVICE WORKER ================= */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js');
+}
 </script>
 
 </body>
