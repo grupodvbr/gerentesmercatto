@@ -4,17 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ff8f1f">
+<title>Check-list Diário</title>
 
-<title>Painel de Gerência</title>
-
-<!-- PWA -->
-<link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="logo.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Gerência">
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
@@ -24,159 +18,260 @@
   --accent2:#ffb347;
   --text:#f1f5f9;
   --muted:#94a3b8;
+  --success:#22c55e;
   --error:#ef4444;
-  --shadow:0 12px 30px rgba(0,0,0,.45);
+  --na:#64748b;
+  --shadow:0 10px 30px rgba(0,0,0,.45);
   --radius:18px;
 }
 *{box-sizing:border-box}
 body{
   margin:0;
-  min-height:100vh;
   font-family:Inter,system-ui;
   background:linear-gradient(180deg,#020617,#0b0f19);
   color:var(--text);
+}
+header{
+  position:sticky;
+  top:0;
+  z-index:10;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  color:#000;
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+header h1{margin:0;font-size:16px}
+header button{
+  background:#000;
+  color:#fff;
+  border:0;
+  padding:8px 12px;
+  border-radius:10px;
+  font-weight:600;
+}
+main{
+  padding:18px;
+  max-width:1000px;
+  margin:auto;
+}
+.setor{
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:16px;
+  margin-bottom:18px;
+}
+.setor h2{
+  margin:0 0 12px;
+  color:var(--accent2);
+  font-size:15px;
+}
+.item{
+  background:#0f172a;
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:12px;
+}
+.item-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+.item-title{
+  font-size:14px;
+  font-weight:600;
+}
+.camera{
+  background:#000;
+  border-radius:50%;
+  width:40px;
+  height:40px;
   display:flex;
   align-items:center;
   justify-content:center;
 }
-.container{
-  width:100%;
-  max-width:420px;
-  padding:22px;
+.camera span{font-size:18px}
+.actions{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
 }
-.card{
-  background:var(--card);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:26px 24px 30px;
-  text-align:center;
-}
-.logo{
-  width:90px;
-  height:90px;
-  border-radius:20px;
-  margin:0 auto 14px;
-  display:block;
-  background:#000;
-  object-fit:contain;
-}
-h1{
-  margin:0;
-  font-size:20px;
+.actions button{
+  flex:1;
+  padding:10px;
+  border-radius:10px;
+  border:0;
   font-weight:700;
 }
-.subtitle{
-  margin:6px 0 22px;
-  font-size:13px;
-  color:var(--muted);
-}
-select,input{
+.ok{background:var(--success);color:#000}
+.no{background:var(--error);color:#000}
+.na{background:var(--na);color:#000}
+textarea{
   width:100%;
-  padding:14px;
-  border-radius:14px;
+  margin-top:10px;
+  padding:10px;
+  border-radius:10px;
   border:0;
   background:#020617;
   color:#fff;
-  margin-bottom:12px;
-  font-size:15px;
-}
-input::placeholder{color:#64748b}
-button{
-  width:100%;
-  padding:14px;
-  border-radius:14px;
-  border:0;
-  font-weight:700;
-  font-size:16px;
-  cursor:pointer;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-  color:#000;
-}
-button:active{transform:scale(.98)}
-.error{
-  min-height:16px;
-  margin-top:10px;
+  resize:none;
   font-size:13px;
-  color:var(--error);
 }
-.footer{
-  margin-top:18px;
+.status{
   font-size:11px;
   color:var(--muted);
+  margin-top:6px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
-  <div class="card">
+<header>
+  <h1>✅ Check-list Diário</h1>
+  <button onclick="voltar()">Voltar</button>
+</header>
 
-    <!-- LOGO -->
-    <img src="logo.png" class="logo" alt="Logo">
-
-    <h1>Painel de Gerência</h1>
-    <div class="subtitle">Grupo Mercatto & Delícia</div>
-
-    <!-- LOGIN -->
-    <select id="usuario">
-      <option value="">Selecione o usuário</option>
-      <option>Mercatto_DHEURE</option>
-      <option>Mercatto_YURI</option>
-      <option>Mercatto_GLEIDSA</option>
-      <option>Mercatto_JAQUELINE</option>
-      <option>Mercatto_IVANIO</option>
-      <option>Delicia Gourmet_RUAN</option>
-      <option>Delicia Gourmet_VALCIR</option>
-    </select>
-
-    <input id="senha" type="password" placeholder="Senha de acesso">
-
-    <button onclick="login()">Entrar</button>
-
-    <div class="error" id="msg"></div>
-
-    <div class="footer">
-      © Grupo DV • Uso interno
-    </div>
-  </div>
-</div>
+<main id="lista"></main>
 
 <script>
-/* ================= LOGIN ================= */
-function login(){
-  const usuario = document.getElementById('usuario').value;
-  const senha = document.getElementById('senha').value;
-  const msg = document.getElementById('msg');
+/* ================= CONTEXTO ================= */
+const empresa = localStorage.getItem('empresa');
+const gerente = localStorage.getItem('gerente');
+const periodo = 'abertura'; // depois pode virar seletor
 
-  if(!usuario || !senha){
-    msg.textContent = 'Preencha usuário e senha';
+if(!empresa || !gerente){
+  location.href = 'index.html';
+}
+
+/* ================= SUPABASE ================= */
+const sb = supabase.createClient(
+  'https://qkuilafoughsaykttjsc.supabase.co',
+  'sb_publishable_SCIIYvHVkFxUIs28r9Tw0A_jJEgCO3g'
+);
+
+let arquivos = {};
+
+/* ================= LOAD BASE ================= */
+async function carregar(){
+  const { data, error } = await sb
+    .from('checklist_base')
+    .select('id,setor,item')
+    .eq('empresa', empresa)
+    .eq('periodo', periodo)
+    .eq('ativo', true)
+    .order('setor')
+    .order('item');
+
+  if(error){
+    alert('Erro ao carregar checklist');
+    console.error(error);
     return;
   }
 
-  const partes = usuario.split('_');
-  const empresa = partes[0];
-  const gerente = partes[1] || 'Usuário';
-
-  // salva sessão
-  localStorage.setItem('empresa', empresa);
-  localStorage.setItem('gerente', gerente);
-
-  // vai para home
-  window.location.href = 'home.html';
+  render(data);
 }
 
-/* ================= AUTOLOGIN ================= */
-window.onload = ()=>{
-  if(localStorage.getItem('empresa') && localStorage.getItem('gerente')){
-    window.location.href = 'home.html';
+/* ================= RENDER ================= */
+function render(itens){
+  const lista = document.getElementById('lista');
+  lista.innerHTML = '';
+
+  const grupos = {};
+  itens.forEach(i=>{
+    if(!grupos[i.setor]) grupos[i.setor] = [];
+    grupos[i.setor].push(i);
+  });
+
+  Object.keys(grupos).forEach(setor=>{
+    const bloco = document.createElement('div');
+    bloco.className = 'setor';
+    bloco.innerHTML = `<h2>${setor}</h2>`;
+
+    grupos[setor].forEach(i=>{
+      const el = document.createElement('div');
+      el.className = 'item';
+      el.innerHTML = `
+        <div class="item-top">
+          <div class="item-title">${i.item}</div>
+          <label class="camera">
+            <span>📷</span>
+            <input type="file" accept="image/*" capture="environment"
+              style="display:none"
+              onchange="selecionar('${i.id}',this)">
+          </label>
+        </div>
+
+        <textarea id="obs_${i.id}" placeholder="Observação (opcional)"></textarea>
+
+        <div class="actions">
+          <button class="ok"
+            onclick="registrar('${i.id}','${i.item}','${setor}','ok')">C</button>
+          <button class="no"
+            onclick="registrar('${i.id}','${i.item}','${setor}','nao_ok')">NC</button>
+          <button class="na"
+            onclick="registrar('${i.id}','${i.item}','${setor}','na')">NA</button>
+        </div>
+
+        <div class="status" id="status_${i.id}"></div>
+      `;
+      bloco.appendChild(el);
+    });
+
+    lista.appendChild(bloco);
+  });
+}
+
+/* ================= FOTO ================= */
+function selecionar(id,input){
+  arquivos[id] = input.files[0];
+}
+
+/* ================= REGISTRAR ================= */
+async function registrar(baseId,item,setor,status){
+  const obs = document.getElementById('obs_'+baseId).value;
+  let anexo = null;
+
+  if(arquivos[baseId]){
+    const nome = `${empresa}/${Date.now()}_${arquivos[baseId].name}`;
+    const { error } = await sb.storage
+      .from('checklist-anexos')
+      .upload(nome, arquivos[baseId]);
+
+    if(!error){
+      anexo = sb.storage
+        .from('checklist-anexos')
+        .getPublicUrl(nome).data.publicUrl;
+    }
   }
-};
 
-/* ================= SERVICE WORKER ================= */
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js');
+  await sb.from('checklist_registros').upsert({
+    checklist_base_id: baseId,
+    empresa,
+    periodo,
+    setor,
+    item,
+    status,
+    observacao: obs,
+    anexo_url: anexo,
+    feito_por: gerente,
+    data_hora: new Date().toISOString()
+  });
+
+  document.getElementById('status_'+baseId)
+    .textContent = `Registrado • ${new Date().toLocaleString()}`;
 }
+
+/* ================= NAV ================= */
+function voltar(){
+  location.href = 'home.html';
+}
+
+/* ================= INIT ================= */
+carregar();
 </script>
 
 </body>
