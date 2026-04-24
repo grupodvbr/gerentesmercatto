@@ -4,223 +4,1064 @@
   <meta charset="UTF-8" />
   <title>Painel de Reservas • Mercatto Delícia</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-  <meta name="color-scheme" content="dark light" />
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <meta name="color-scheme" content="light dark" />
   <style>
-    /* ================== TEMA DESPERDÍCIO (Dark + Laranja Mercatto) ================== */
-    :root{
-      --bg:#0b0f19;
-      --card:#151d2f;
-      --text:#f8fafc;
-      --muted:#94a3b8;
-      --line:#243043;
+:root{
 
-      --accent:#ff8f1f;
-      --accent2:#ffb347;
+color-scheme:dark;
 
-      --ok:#22c55e;
-      --warn:#d97706;
-      --danger:#ef4444;
+--bg:#050b16;
+--card:#0b1324;
 
-      --radius:16px;
-      --shadow:0 12px 30px rgba(0,0,0,.45);
-      --glass:rgba(2,6,23,.45);
-    }
+--text:#e6edf6;
+--muted:#8b9bb4;
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(1000px 700px at -5% -10%, rgba(255,143,31,.10), transparent 60%),
-        radial-gradient(1000px 700px at 110% -20%, rgba(255,179,71,.10), transparent 60%),
-        linear-gradient(180deg, #0a0f1b, #0b0f19 40%, #0b0f19 100%);
-    }
+--line:#1c2a44;
 
-    .wrap{max-width:1180px; margin:auto; padding:28px 18px 40px}
+--brand:#3b82f6;
+--brand-2:#2563eb;
 
-    /* Header */
-    header{
-      display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:22px
-    }
-    .title{
-      font-size:clamp(1.2rem,2.6vw,1.8rem); font-weight:900; letter-spacing:.2px;
-      display:flex; align-items:center; gap:12px
-    }
-    .title::before{
-      content:""; width:14px; height:14px; border-radius:4px;
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      box-shadow:0 0 0 2px rgba(255,143,31,.2), 0 0 24px rgba(255,143,31,.3);
-    }
-    .badge{
-      font-size:.82rem;
-      background:linear-gradient(90deg,var(--accent),var(--accent2));
-      color:#000;
-      padding:6px 10px; border-radius:999px; box-shadow:var(--shadow); font-weight:800;
-    }
+--ok:#22c55e;
+--warn:#f59e0b;
+--danger:#ef4444;
 
-    /* Cards */
-    .card{
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0)) padding-box,
-        linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,0)) border-box;
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      backdrop-filter:saturate(120%) blur(6px);
-    }
-    .card-head{
-      display:flex; align-items:center; justify-content:space-between;
-      padding:16px 18px; border-bottom:1px dashed var(--line);
-      background:linear-gradient(90deg, rgba(255,143,31,.10), rgba(255,179,71,.08) 60%, transparent);
-    }
-    .card-head h2{margin:0; font-size:1.05rem}
-    .section{padding:18px}
-    .section + .section{border-top:1px dashed var(--line)}
-    .section h3{margin:0 0 10px; font-size:1rem; color:var(--muted); font-weight:800; letter-spacing:.3px}
+--accent:#f59e0b;
 
-    /* Inputs */
-    label{font-weight:700; font-size:.94rem}
-    input, select, textarea, button{
-      width:100%; padding:12px 12px; border-radius:12px; border:1px solid var(--line);
-      background:#0f172a; color:var(--text); font-size:16px; outline:none; transition:.15s;
-    }
-    input::placeholder, textarea::placeholder{color:#7c8aa4}
-    input:focus, select:focus, textarea:focus{
-      border-color:var(--accent);
-      box-shadow:0 0 0 3px rgba(255,143,31,.22), 0 0 28px rgba(255,143,31,.10) inset;
-    }
-    textarea{min-height:90px; resize:vertical}
-    .hint{font-size:.82rem; color:var(--muted)}
+--radius:16px;
 
-    .toolbar{display:flex; gap:10px; flex-wrap:wrap}
-    .btn{border:0; cursor:pointer; font-weight:900; letter-spacing:.2px}
-    .btn-primary{
-      background:linear-gradient(90deg,var(--accent),var(--accent2));
-      color:#000;
-      box-shadow:0 6px 18px rgba(255,143,31,.25);
-    }
-    .btn-primary:hover{filter:brightness(1.05)}
-    .btn-ghost{
-      background:#0f172a; border:1px dashed var(--line); color:var(--text);
-    }
-    .btn-ghost:hover{border-color:var(--accent); box-shadow:0 0 0 3px rgba(255,143,31,.12)}
-    .btn-danger{background:linear-gradient(90deg,#ef4444,#f87171); color:#fff}
-    .btn:disabled{opacity:.6; cursor:not-allowed}
-    .row{display:flex; align-items:center; gap:10px}
+--shadow:0 12px 30px rgba(0,0,0,.7);
 
-    .chip{
-      border:1px solid var(--line); border-radius:999px; padding:6px 10px;
-      font-size:.84rem; color:var(--muted); background:rgba(15,23,42,.6); backdrop-filter: blur(6px)
-    }
+--glass:rgba(15,23,42,.75);
 
-    .file-box{
-      display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px;
-      border:1px dashed var(--line); border-radius:12px; background:#0f172a;
-    }
-    .file-name{font-size:.9rem; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+}
 
-    .spinner{display:none; margin-top:10px; color:var(--muted)}
-    .spinner.show{display:block}
+/* =========================
+   RESET
+========================= */
 
-    .toast{
-      position:fixed; inset:auto 16px 16px auto;
-      background:linear-gradient(135deg,#0b1220,#111827);
-      color:#fff; padding:12px 14px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.5);
-      border:1px solid #1f2937;
-      display:none; z-index:50
-    }
-    .toast.show{display:block}
+*{
+box-sizing:border-box;
+}
 
-    /* ================== Calendário ================== */
-    .cal{padding:16px}
-    .cal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px}
-    .cal-title{font-weight:900; font-size:1.1rem}
-    .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:8px}
-    .cal-dow{font-size:.9rem; color:var(--muted); text-align:center; padding:6px 0}
-    .cal-day{
-      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
-      border:1px solid var(--line); border-radius:14px;
-      padding:12px; min-height:120px; position:relative; cursor:pointer;
-      transition:.12s transform ease, .12s box-shadow ease, .12s border-color ease;
-    }
-    .cal-day:hover{
-      transform:translateY(-1px);
-      box-shadow:0 12px 26px rgba(0,0,0,.25);
-      border-color:rgba(255,143,31,.55);
-    }
-    .cal-day.out{opacity:.45}
-    .cal-day .num{font-weight:900; font-size:1.05rem}
-    .cal-day .tags{position:absolute; bottom:10px; left:10px; right:10px; display:flex; gap:6px; flex-wrap:wrap}
-    .tag{
-      font-size:.78rem; padding:4px 8px; border-radius:999px; border:1px solid var(--line);
-      background:#0f172a; color:#cdd6e3
-    }
-    .t-pend{background:#3c2a07; border-color:#5a3e0b; color:#ffcd73}
-    .t-done{background:#0e2a12; border-color:#1f7a39; color:#9ef7b8}
-    .t-vip{ background:#0b274a; border-color:#1b4c8b; color:#86baff; }
-    .t-outros{ background:#3a230e; border-color:#794216; color:#ffbf86; }
+html,body{
+height:100%;
+}
 
-    /* ================== Resumo ================== */
-    .summary{padding:16px; border-top:1px dashed var(--line); background:linear-gradient(180deg, rgba(255,255,255,.03), transparent)}
-    .summary-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
-    @media (max-width:720px){ .summary-grid{grid-template-columns:1fr} }
-    .kpi{
-      border:1px solid var(--line); border-radius:12px; padding:14px; background:#0f172a;
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);
-    }
-    .kpi .label{font-size:.9rem; color:var(--muted)}
-    .kpi .value{font-size:1.4rem; font-weight:900}
-    .sum-note{font-size:.82rem; color:var(--muted); margin-top:6px}
+body{
 
-    footer{padding:16px 18px 18px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
+margin:0;
 
-    /* ================== Modais ================== */
-    .modal{
-      position:fixed; inset:0; background:rgba(0,0,0,.55);
-      display:none; align-items:flex-end; z-index:60; backdrop-filter: blur(2px);
-    }
-    .modal.show{display:flex}
-    .sheet{
-      background:linear-gradient(180deg, #0f172a, #0b1220);
-      width:100%; max-height:82vh; border-radius:18px 18px 0 0;
-      box-shadow:0 -10px 30px rgba(0,0,0,.5); overflow:auto; border:1px solid #1f2937;
-    }
-    .sheet h3{margin:14px 16px; color:#ffb347}
-    .sheet .list{padding:0 16px 16px}
-    .res-item{
-      border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:10px;
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
-    }
-    .res-item .top{display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap}
-    .res-item .name{font-weight:800}
-    .res-item .meta{font-size:.9rem; color:var(--muted)}
+font-family:
+Inter,
+system-ui,
+-apple-system,
+Segoe UI,
+Roboto,
+Arial,
+sans-serif;
 
-    /* Modal de Concluir central */
-    #finishModal{align-items:center; justify-content:center}
-    #finishModal .sheet{max-width:520px; border-radius:16px; overflow:hidden}
+background:
+radial-gradient(1200px 800px at -10% -20%, rgba(59,130,246,.08), transparent 60%),
+radial-gradient(900px 700px at 110% -10%, rgba(34,197,94,.08), transparent 60%),
+var(--bg);
 
-    /* Edit sheet */
-    #editModal .sheet{border-radius:18px 18px 0 0}
-    .inline-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-    .inline-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px}
-    @media (max-width:760px){ .inline-grid,.inline-3{grid-template-columns:1fr} }
-    .list-bordered{border:1px dashed var(--line); border-radius:12px; padding:10px; display:flex; flex-direction:column; gap:10px; background:#0f172a}
-    .item-row{display:grid; grid-template-columns:1fr 1fr; gap:8px}
-    .item-row-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px}
-    .item-actions{display:flex; gap:8px; justify-content:flex-end}
+color:var(--text);
+
+}
+
+/* =========================
+   WRAP
+========================= */
+
+.wrap{
+  width:100%;
+  max-width:1200px;
+  margin:auto;
+  padding:16px;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+header{
+
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+margin-bottom:22px;
+
+}
+
+.title{
+
+font-size:clamp(1.2rem,2.6vw,1.8rem);
+font-weight:900;
+letter-spacing:.2px;
+display:flex;
+align-items:center;
+gap:12px;
+
+}
+
+.badge{
+
+font-size:.82rem;
+
+background:linear-gradient(90deg,var(--brand),var(--brand-2));
+
+color:#fff;
+
+padding:6px 10px;
+
+border-radius:999px;
+
+box-shadow:var(--shadow);
+
+}
+
+/* =========================
+   CARD
+========================= */
+
+.card{
+
+background:var(--card);
+
+border:1px solid var(--line);
+
+border-radius:var(--radius);
+
+box-shadow:var(--shadow);
+
+overflow:hidden;
+
+}
+
+.card-head{
+
+display:flex;
+align-items:center;
+justify-content:space-between;
+
+padding:16px 18px;
+
+border-bottom:1px dashed var(--line);
+
+background:var(--glass);
+
+backdrop-filter:blur(6px);
+
+}
+
+.card-head h2{
+
+margin:0;
+font-size:1.05rem;
+
+}
+
+/* =========================
+   SECTION
+========================= */
+
+.section{
+
+padding:18px;
+
+}
+
+.section + .section{
+
+border-top:1px dashed var(--line);
+
+}
+
+.section h3{
+
+margin:0 0 10px;
+
+font-size:1rem;
+
+color:var(--muted);
+
+font-weight:700;
+
+letter-spacing:.3px;
+
+}
+
+/* =========================
+   INPUTS
+========================= */
+
+label{
+
+font-weight:600;
+font-size:.94rem;
+
+}
+
+input,
+select,
+textarea{
+
+width:100%;
+
+padding:12px;
+
+border-radius:12px;
+
+border:1px solid var(--line);
+
+background:#071226;
+
+color:var(--text);
+
+font-size:16px;
+
+outline:none;
+
+transition:.15s;
+
+}
+
+input::placeholder,
+textarea::placeholder{
+color:var(--muted);
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+
+border-color:var(--brand);
+
+box-shadow:0 0 0 3px rgba(59,130,246,.25);
+
+}
+
+select option{
+
+background:#0b1324;
+color:var(--text);
+
+}
+
+textarea{
+
+min-height:90px;
+
+resize:vertical;
+
+}
+
+.hint{
+
+font-size:.82rem;
+
+color:var(--muted);
+
+}
+
+/* =========================
+   BOTÕES
+========================= */
+
+.toolbar{
+
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+
+}
+
+button{
+
+  padding:10px 12px;
+  font-size:14px;
+border-radius:12px;
+
+border:1px solid var(--line);
+
+background:#071226;
+
+color:var(--text);
+
+cursor:pointer;
+
+}
+
+.btn{
+font-weight:700;
+white-space:nowrap;
+}
+.btn-primary{
+
+background:linear-gradient(90deg,var(--brand),var(--brand-2));
+
+color:#fff;
+
+border:none;
+
+}
+
+.btn-ghost{
+
+background:transparent;
+
+border:1px dashed var(--line);
+
+}
+
+.btn-danger{
+
+background:var(--danger);
+
+border:none;
+
+color:#fff;
+
+}
+
+button:hover{
+opacity:.9;
+}
+
+.btn:disabled{
+
+opacity:.6;
+cursor:not-allowed;
+
+}
+
+/* =========================
+   ELEMENTOS
+========================= */
+
+.row{
+
+display:flex;
+align-items:center;
+gap:10px;
+
+}
+
+.chip{
+border-radius:999px;
+padding:6px 10px;
+font-size:.84rem;
+font-weight:700;
+}
+
+.chip.pendente{
+background:#92400e30;
+color:#fcd34d;
+}
+
+.chip.confirmada{
+background:#1e3a8a30;
+color:#93c5fd;
+}
+
+.chip.concluida{
+background:#14532d30;
+color:#86efac;
+}
+
+.chip.cancelada{
+background:#7f1d1d30;
+color:#fca5a5;
+}
+.status-row{
+display:flex;
+gap:6px;
+margin-top:6px;
+flex-wrap:wrap;
+}
+
+.status-mini{
+font-size:.72rem;
+padding:3px 7px;
+border-radius:999px;
+border:1px solid var(--line);
+opacity:.35;
+}
+
+.status-mini.active{
+opacity:1;
+font-weight:700;
+}
+
+.status-mini.pendente{
+background:#92400e30;
+color:#fcd34d;
+}
+
+.status-mini.confirmada{
+background:#1e3a8a30;
+color:#93c5fd;
+}
+
+.status-mini.concluida{
+background:#14532d30;
+color:#86efac;
+}
+
+.status-mini.cancelada{
+background:#7f1d1d30;
+color:#fca5a5;
+}
+.file-box{
+
+display:flex;
+align-items:center;
+justify-content:space-between;
+
+gap:10px;
+
+padding:10px;
+
+border:1px dashed var(--line);
+
+border-radius:12px;
+
+}
+
+.file-name{
+
+font-size:.9rem;
+
+color:var(--muted);
+
+overflow:hidden;
+
+text-overflow:ellipsis;
+
+white-space:nowrap;
+
+}
+
+.spinner{
+
+display:none;
+
+margin-top:10px;
+
+color:var(--muted);
+
+}
+
+.spinner.show{
+display:block;
+}
+
+/* =========================
+   TOAST
+========================= */
+
+.toast{
+
+position:fixed;
+
+inset:auto 16px 16px auto;
+
+background:#020617;
+
+color:#fff;
+
+padding:12px 14px;
+
+border-radius:12px;
+
+box-shadow:0 10px 30px rgba(0,0,0,.5);
+
+display:none;
+
+z-index:50;
+
+}
+
+.toast.show{
+display:block;
+}
+
+/* =========================
+   CALENDÁRIO
+========================= */
+
+.cal{
+padding:16px;
+}
+
+.cal-head{
+
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:12px;
+
+}
+
+.cal-title{
+
+font-weight:800;
+font-size:1.1rem;
+
+}
+
+.cal-grid{
+
+display:grid;
+
+grid-template-columns:repeat(7,1fr);
+
+gap:8px;
+
+}
+
+.cal-dow{
+
+font-size:.9rem;
+
+color:var(--muted);
+
+text-align:center;
+
+padding:6px 0;
+
+}
+
+.cal-day{
+
+background:#081428;
+
+border:1px solid var(--line);
+
+border-radius:12px;
+
+  min-height:65px;
+  padding:6px;
+
+position:relative;
+
+cursor:pointer;
+
+transition:.12s transform ease,.12s box-shadow ease;
+
+}
+
+.cal-day:hover{
+
+transform:translateY(-1px);
+
+box-shadow:0 10px 25px rgba(0,0,0,.6);
+
+}
+
+.cal-day.out{
+
+opacity:.45;
+
+}
+
+.cal-day .num{
+
+position:absolute;
+
+top:6px;
+
+right:8px;
+
+font-weight:800;
+
+font-size:.9rem;
+
+}
+
+.cal-day .tags{
+  position:absolute;
+  bottom:4px;
+  left:4px;
+  right:4px;
+
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+
+  max-height:40px;
+  overflow-y:auto;
+
+  padding-right:2px;
+}
+/* =========================
+   TAGS
+========================= */
+.tag{
+  font-size:10px;
+  padding:2px 4px;
+  line-height:1.1;
+  white-space:nowrap;
+}
+
+.t-pend{
+
+background:#92400e30;
+
+border-color:#f59e0b;
+
+color:#fcd34d;
+
+}
+
+.t-done{
+
+background:#14532d30;
+
+border-color:#22c55e;
+
+color:#86efac;
+
+}
+
+.t-vip{
+
+background:#1e3a8a30;
+
+border-color:#3b82f6;
+
+color:#93c5fd;
+
+}
+
+.t-outros{
+
+background:#7c2d1230;
+
+border-color:#f97316;
+
+color:#fdba74;
+
+}
+
+/* =========================
+   RESUMO
+========================= */
+
+.summary{
+
+padding:16px;
+
+border-top:1px dashed var(--line);
+
+background:#071226;
+
+}
+
+.summary-grid{
+
+display:grid;
+
+grid-template-columns:repeat(3,1fr);
+
+gap:12px;
+
+}
+
+@media (max-width:720px){
+
+.summary-grid{
+grid-template-columns:1fr;
+}
+
+}
+
+.kpi{
+
+border:1px solid var(--line);
+
+border-radius:12px;
+
+padding:14px;
+
+background:#081428;
+
+}
+
+.kpi .label{
+
+font-size:.9rem;
+
+color:var(--muted);
+
+}
+
+.kpi .value{
+
+font-size:1.4rem;
+
+font-weight:900;
+
+}
+
+.sum-note{
+
+font-size:.82rem;
+
+color:var(--muted);
+
+margin-top:6px;
+
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+footer{
+
+padding:16px 18px 18px;
+
+display:flex;
+
+align-items:center;
+
+justify-content:space-between;
+
+gap:10px;
+
+flex-wrap:wrap;
+
+}
+
+/* =========================
+   MODAIS
+========================= */
+
+.modal{
+
+position:fixed;
+
+inset:0;
+
+background:rgba(0,0,0,.65);
+
+display:none;
+
+align-items:flex-end;
+
+z-index:60;
+
+}
+
+.modal.show{
+display:flex;
+}
+
+.sheet{
+
+background:var(--card);
+
+width:100%;
+
+max-height:82vh;
+
+border-radius:18px 18px 0 0;
+
+box-shadow:0 -10px 30px rgba(0,0,0,.6);
+
+overflow:auto;
+
+}
+
+.sheet h3{
+margin:14px 16px;
+}
+
+.sheet .list{
+padding:0 16px 16px;
+}
+
+.res-item{
+
+border:1px solid var(--line);
+
+border-radius:10px;
+
+padding:8px;
+
+margin-bottom:6px;
+
+background:#081428;
+
+font-size:.85rem;
+
+}
+
+.res-item .top{
+
+display:flex;
+
+justify-content:space-between;
+
+gap:8px;
+
+flex-wrap:wrap;
+
+}
+
+.res-item .name{
+font-weight:800;
+}
+
+.res-item .meta{
+
+font-size:.9rem;
+
+color:var(--muted);
+
+}
+
+/* =========================
+   MODAL CONCLUIR
+========================= */
+
+#finishModal{
+
+align-items:center;
+justify-content:center;
+
+}
+
+#finishModal .sheet{
+
+max-width:520px;
+
+border-radius:16px;
+
+overflow:hidden;
+
+}
+
+/* =========================
+   GRID
+========================= */
+
+.inline-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+}
+
+.inline-3{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+}
+
+@media(min-width:700px){
+  .inline-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .inline-3{
+    grid-template-columns:1fr 1fr 1fr;
+  }
+}
+
+@media (max-width:760px){
+
+.inline-grid,
+.inline-3{
+
+grid-template-columns:1fr;
+
+}
+
+}
+
+.list-bordered{
+
+border:1px dashed var(--line);
+
+border-radius:12px;
+
+padding:10px;
+
+display:flex;
+
+flex-direction:column;
+
+gap:10px;
+
+}
+
+.item-row{
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:8px;
+
+}
+
+.item-row-3{
+
+display:grid;
+
+grid-template-columns:1fr 1fr 1fr;
+
+gap:8px;
+
+}
+
+.item-actions{
+
+display:flex;
+
+gap:8px;
+
+justify-content:flex-end;
+
+}
+
+  /* =========================
+   MOBILE FIX RESERVAS
+========================= */
+
+@media (max-width:600px){
+
+.res-item{
+
+padding:10px 8px;
+
+font-size:.82rem;
+
+}
+
+.res-item .top{
+
+flex-direction:column;
+
+align-items:flex-start;
+
+gap:6px;
+
+}
+
+/* linha de botões */
+
+.res-item .row{
+
+width:100%;
+
+flex-wrap:wrap;
+
+gap:6px;
+
+}
+
+/* botões menores */
+
+.res-item .btn{
+
+padding:6px 8px;
+
+font-size:.75rem;
+
+}
+
+/* select menor */
+
+.res-item select{
+
+padding:6px 8px;
+
+font-size:.75rem;
+
+}
+
+/* textos menores */
+
+.res-item .meta{
+
+font-size:.75rem;
+
+line-height:1.35;
+
+}
+
+.res-item .name{
+
+font-size:.9rem;
+
+}
+
+}
+.summary-compact{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  padding:10px;
+}
+
+.mini-kpi{
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  background:#081428;
+  border:1px solid var(--line);
+  border-radius:10px;
+
+  padding:10px;
+}
+
+.mini-kpi span{
+  font-size:18px;
+}
+
+.mini-kpi small{
+  display:block;
+  font-size:.7rem;
+  color:var(--muted);
+}
+
+.mini-kpi b{
+  font-size:.95rem;
+  font-weight:800;
+}
+
+.mini-kpi.total{
+  background:linear-gradient(90deg,#1e3a8a,#2563eb);
+}
+
+  @media (max-width:600px){
+  .summary-compact{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+
+
+
+    
+    
   </style>
 </head>
 <body>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <div class="wrap">
     <header>
       <div class="title">Reservas • Mercatto Delícia</div>
       <div class="badge">Cadastro → Calendário → Resumo</div>
     </header>
 
-    <!-- ================== FORMULÁRIO ================== -->
+    <!-- ============ FORMULÁRIO (em cima) ============ -->
     <form id="reservaForm" class="card" novalidate>
       <div class="card-head"><h2>Nova / Editar Reserva</h2></div>
 
@@ -252,39 +1093,54 @@
       </div>
 
       <div class="section">
-        <h3>🪑 Detalhes da Reserva</h3>
-        <div class="inline-grid">
-          <div>
-            <label for="mesa">Local da Reserva <span style="color:var(--danger)">*</span></label>
-            <select id="mesa" name="mesa" required>
-              <option value="">Selecione o local</option>
-              <option>SALA VIP</option>
-              <option>SALA VIP 2</option>
-              <option>SACADA</option>
-              <option>SALÃO CENTRAL</option>
-            </select>
-          </div>
-          <div>
-            <label for="cardapio">Cardápio</label>
-            <select id="cardapio" name="cardapio">
-              <option value="">Selecione</option>
-              <option>Buffet Ouro</option>
-              <option>Buffet Diamante</option>
-              <option>Buffet Master Gold</option>
-              <option>Rodízio Pizza</option>
-              <option>Rodízio Happy Hour</option>
-              <option>À la carte</option>
-              <option>Cardápio Verde</option>
-              <option>Cardápio Azul</option>
-              <option>Cardápio Vermelho</option>
-              <option>Outro</option>
-            </select>
-          </div>
-        </div>
+<h3>🪑 Detalhes da Reserva</h3>
 
-        <label for="datahora">Data e Hora da Reserva <span style="color:var(--danger)">*</span></label>
-        <input type="datetime-local" id="datahora" name="datahora" required />
-        <div class="hint">Não é permitido escolher data passada.</div>
+<div class="inline-grid">
+
+  <div>
+    <label for="mesa">Local da Reserva <span style="color:var(--danger)">*</span></label>
+    <select id="mesa" name="mesa" required>
+      <option value="">Selecione o local</option>
+      <option>Sala VIP 1</option>
+      <option>Sala VIP 2</option>
+      <option>Sacada</option>
+      <option>Salão Central</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="cardapio">Cardápio</label>
+    <select id="cardapio" name="cardapio">
+      <option value="">Selecione</option>
+      <option>Buffet Ouro</option>
+      <option>Buffet Diamante</option>
+      <option>Buffet Master Gold</option>
+
+            <option>Rodízio Italiano</option>
+            <option>Rodízio Oriental</option>
+            <option>À lá carte</option>
+            <option>Buffet</option>
+
+
+      
+      <option>Outro</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="comandaIndividual">Comanda Individual?</label>
+    <select id="comandaIndividual" name="comandaIndividual">
+      <option value="">Selecione</option>
+      <option value="Sim">Sim</option>
+      <option value="Não">Não</option>
+    </select>
+  </div>
+
+</div>
+
+<label for="datahora">Data e Hora da Reserva <span style="color:var(--danger)">*</span></label>
+<input type="datetime-local" id="datahora" name="datahora" required />
+<div class="hint">Não é permitido escolher data passada.</div>
       </div>
 
       <div class="section">
@@ -341,22 +1197,31 @@
       <footer>
         <div class="spinner" id="spinner">⬤ Enviando...</div>
         <div class="toolbar" style="margin-left:auto">
-          <button type="button" id="cancelEdit" class="btn btn-ghost" style="display:none">Cancelar edição</button>
           <button type="reset" class="btn btn-ghost">Limpar</button>
           <button type="submit" id="submitBtn" class="btn btn-primary">Salvar Reserva</button>
         </div>
       </footer>
     </form>
 
-    <!-- ================== CALENDÁRIO + RESUMO ================== -->
+    <!-- ============ CALENDÁRIO (embaixo) + RESUMO ============ -->
     <div class="card" style="margin-top:20px">
       <div class="card-head">
         <h2>Calendário de Reservas</h2>
-        <div class="toolbar">
-          <button id="prevMonth" class="btn btn-ghost">◀ Mês anterior</button>
-          <button id="todayBtn" class="btn btn-ghost">Hoje</button>
-          <button id="nextMonth" class="btn btn-ghost">Próximo mês ▶</button>
-        </div>
+
+
+<div class="toolbar">
+  <button id="prevMonth" class="btn btn-ghost">◀ Mês anterior</button>
+  <button id="todayBtn" class="btn btn-ghost">Hoje</button>
+  <button id="nextMonth" class="btn btn-ghost">Próximo mês ▶</button>
+
+  <button id="btnPDF" class="btn btn-primary">
+    📄 Gerar PDF do Mês
+  </button>
+</div>
+
+
+
+        
       </div>
 
       <div class="cal">
@@ -369,31 +1234,53 @@
 
       <div class="summary">
         <h3 style="margin:0 0 6px 0; color:var(--muted)">Resumo do mês</h3>
-        <div class="summary-grid">
-          <div class="kpi"><div class="label">Antecipado (mês)</div><div class="value" id="kpiAntecipado">R$ 0,00</div></div>
-          <div class="kpi"><div class="label">Final pago (mês)</div><div class="value" id="kpiFinalPago">R$ 0,00</div></div>
-          <div class="kpi">
-            <div class="label">A receber (mês)</div>
-            <div class="value" id="kpiAReceber">R$ 0,00</div>
-            <div class="sum-note">* "A receber" não entra na soma do mês (apenas adiantamento + final pago).</div>
-          </div>
-        </div>
-        <div class="section" style="padding-top:12px">
-          <div class="kpi" style="display:flex; align-items:center; justify-content:space-between">
-            <div>
-              <div class="label">Total do mês (adiantamento + final pago)</div>
-              <div class="value" id="kpiTotalMes">R$ 0,00</div>
-            </div>
-            <button id="refreshBtn" class="btn btn-ghost" style="width:auto">Atualizar</button>
-          </div>
-        </div>
-      </div>
+
+
+
+
+        <div class="summary-compact">
+
+  <div class="mini-kpi">
+    <span>💰</span>
+    <div>
+      <small>Antecipado</small>
+      <b id="kpiAntecipado">R$ 0,00</b>
     </div>
   </div>
 
-  <!-- ================== MODAIS ================== -->
-  <div class="modal" id="dayModal" aria-hidden="true">
-    <div class="sheet">
+  <div class="mini-kpi">
+    <span>🏁</span>
+    <div>
+      <small>Final</small>
+      <b id="kpiFinalPago">R$ 0,00</b>
+    </div>
+  </div>
+
+  <div class="mini-kpi">
+    <span>📥</span>
+    <div>
+      <small>Receber</small>
+      <b id="kpiAReceber">R$ 0,00</b>
+    </div>
+  </div>
+
+  <div class="mini-kpi total">
+    <span>📊</span>
+    <div>
+      <small>Total</small>
+      <b id="kpiTotalMes">R$ 0,00</b>
+    </div>
+  </div>
+
+</div>
+
+      </div>
+
+</div> <!-- 🔥 FALTAVA ISSO AQUI -->
+
+  <!-- ============ MODAIS ============ -->
+<div class="modal" id="dayModal">
+  <div class="sheet">
       <h3 id="modalTitle">Reservas do dia</h3>
       <div class="list" id="modalList"></div>
     </div>
@@ -414,7 +1301,7 @@
     </div>
   </div>
 
-  <!-- Modal de Edição -->
+  <!-- Modal de Edição (opcional — mantido caso queira usar depois) -->
   <div class="modal" id="editModal" aria-hidden="true">
     <div class="sheet">
       <h3 style="margin-bottom:0">✏️ Editar reserva / adicionar pagamentos & anexos</h3>
@@ -430,32 +1317,46 @@
           </div>
         </div>
         <div class="section">
-          <h3>🪑 Reserva</h3>
-          <div class="inline-grid">
-            <div>
-              <label>Local</label>
-              <select id="e_mesa">
-                <option value="">Selecione</option>
-                <option>SALA VIP</option>
-                <option>SALA VIP 2</option>
-                <option>SACADA</option>
-                <option>SALÃO CENTRAL</option>
-              </select>
-            </div>
-            <div>
-              <label>Cardápio</label>
-              <select id="e_cardapio">
-                <option value="">Selecione</option>
-                <option>Buffet Básico</option>
-                <option>Buffet Premium</option>
-                <option>Rodízio</option>
-                <option>À la carte</option>
-                <option>Outro</option>
-              </select>
-            </div>
-          </div>
-          <label>Data e Hora</label>
-          <input id="e_datahora" type="datetime-local" />
+<h3>🪑 Reserva</h3>
+
+<div class="inline-grid">
+
+<div>
+<label>Local</label>
+<select id="e_mesa">
+<option value="">Selecione</option>
+<option>Sala VIP 1</option>
+<option>Sala VIP 2</option>
+<option>Sacada</option>
+<option>Salão Central</option>
+</select>
+</div>
+
+<div>
+<label>Cardápio</label>
+<select id="e_cardapio">
+<option value="">Selecione</option>
+<option>Buffet Básico</option>
+<option>Buffet Premium</option>
+<option>Rodízio</option>
+<option>À la carte</option>
+<option>Outro</option>
+</select>
+</div>
+
+<div>
+<label>Comanda Individual</label>
+<select id="e_comandaIndividual">
+<option value="">Selecione</option>
+<option value="Sim">Sim</option>
+<option value="Não">Não</option>
+</select>
+</div>
+
+</div>
+
+<label>Data e Hora</label>
+<input id="e_datahora" type="datetime-local" />
         </div>
         <div class="section">
           <h3>💳 Pagamentos</h3>
@@ -499,15 +1400,40 @@
       </div>
     </div>
   </div>
+<div class="modal" id="deleteModal">
+  <div class="sheet" style="max-width:420px;border-radius:16px;">
+    <div style="padding:20px">
 
+      <h3>Excluir reserva</h3>
+
+      <div id="deleteText" class="hint" style="margin-top:10px"></div>
+
+      <div class="toolbar" style="margin-top:18px;justify-content:flex-end">
+
+        <button id="cancelDelete" class="btn btn-ghost" style="width:auto">
+          Cancelar
+        </button>
+
+        <button id="confirmDelete" class="btn btn-danger" style="width:auto">
+          Excluir
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+</div>
   <div id="toast" class="toast"></div>
 
   <script>
-    /* ==============================
-       Config
-    ============================== */
-    const endpoint = "https://script.google.com/macros/s/AKfycbwE-0oOl4wGHz7gFXHIgYHNihCTW4-uzUjGv_iLvPSWX1sma8pi9eJIwx1K4grFOILj/exec";
+  
 
+const SUPABASE_URL = "https://dxkszikemntfusfyrzos.supabase.co"
+const SUPABASE_KEY = "sb_publishable_NNFvdfSXgOdGGVcSbphbjQ_brC3_9ed"
+const supabaseClient = supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+)
     /* ==============================
        Helpers
     ============================== */
@@ -516,12 +1442,51 @@
     const toast = (msg, ms=3500) => { const el = $("#toast"); el.textContent = msg; el.classList.add("show"); setTimeout(()=>el.classList.remove("show"), ms); };
     const maskPhone = v => { const d = v.replace(/\D/g,'').slice(0,11); return d.length<=10? d.replace(/^(\d{2})(\d{4})(\d{0,4}).*/,"($1) $2-$3") : d.replace(/^(\d{2})(\d{5})(\d{0,4}).*/,"($1) $2-$3"); };
     const formatBRL = (num) => Number(num||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-    const formatBRLInput = v => { const only=v.replace(/[^\d]/g,''); const n=Number(only)/100; return isNaN(n)?"": n.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2}); };
-    const parseBRL = v => { if(!v) return 0; const s=v.toString().replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',', '.'); const n=Number(s); return isNaN(n)?0:n; };
+const formatBRLInput = v => {
+  const only = v.replace(/[^\d]/g, "");
+  if (!only) return "";
+
+  const n = Number(only) / 100;
+
+  return n.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+};
+
+const parseBRL = v => {
+  if (v === null || v === undefined || v === '') return 0;
+
+  // Se vier número, retorna direto
+  if (typeof v === 'number') return v;
+
+  const s = v.toString().trim();
+
+  // Se já é número puro (ex: "200" ou "200.5")
+  if (/^\d+(\.\d+)?$/.test(s)) {
+    return Number(s);
+  }
+
+  // Formato BR: "1.234,56"
+  const clean = s.replace(/\./g, '').replace(',', '.').replace(/[^\d.]/g, '');
+  return Number(clean) || 0;
+};
+
     const nowLocalMin = ()=>{ const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,16); };
     const ymd = d=>{ const z=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`; };
-    const toBase64 = (file) => new Promise((resolve,reject)=>{ const r=new FileReader(); r.onload=()=>resolve(r.result); r.onerror=reject; r.readAsDataURL(file); });
 
+    
+const toBase64 = (file) => new Promise((resolve,reject)=>{
+
+const reader = new FileReader();
+
+reader.onload = ()=> resolve(reader.result);
+
+reader.onerror = reject;
+
+reader.readAsDataURL(file);
+
+});
     /* ==============================
        Estado
     ============================== */
@@ -530,64 +1495,95 @@
     /* ==============================
        API
     ============================== */
-    const api = {
-      async listar(ano, mes){
-        const url = `${endpoint}?acao=listar&ano=${ano}&mes=${mes+1}`;
-        const res = await fetch(url, {method:'GET'});
-        if(!res.ok) throw new Error(`Erro ${res.status}`);
-        const data = await res.json();
-        if(!Array.isArray(data)) throw new Error('Resposta inválida da API.');
-        return data;
-      },
-      async cadastrar(payload){
-        try{
-          const res = await fetch(endpoint, { method:'POST', body:new URLSearchParams(payload) });
-          const txt = await res.text();
-          if(!res.ok) return { ok:false, message: txt || 'Falha ao salvar na planilha.' };
-          return { ok:true, message: txt || 'OK' };
-        }catch(e){
-          return { ok:false, message:`Erro ao salvar na planilha: ${e.message}` };
-        }
-      },
-      async atualizar(id, payload){
-        try{
-          const body = new URLSearchParams({ acao:'atualizar', id, ...payload });
-          const res = await fetch(endpoint, { method:'POST', body });
-          const txt = await res.text();
-          if(!res.ok) return { ok:false, message: txt || 'Falha ao atualizar na planilha.' };
-          try{
-            const json = JSON.parse(txt);
-            if (json.ok === false) return { ok:false, message: json.error || 'Falha ao atualizar.' };
-            return { ok:true, message: json.message || 'Atualizado' };
-          }catch{ /* resposta texto simples */ }
-          return { ok:true, message: txt || 'Atualizado' };
-        }catch(e){
-          return { ok:false, message:`Erro ao atualizar: ${e.message}` };
-        }
-      },
-      async concluir(id, valorFinalPago){
-        try{
-          const body = new URLSearchParams({ acao:'concluir', id, valorFinalPago:String(valorFinalPago), status:'Concluída' });
-          const res = await fetch(endpoint, { method:'POST', body });
-          const txt = await res.text();
-          if(!res.ok) return { ok:false, message: txt || 'Falha ao concluir na planilha.' };
-          return { ok:true, message: txt || 'Concluída' };
-        }catch(e){
-          return { ok:false, message:`Erro ao concluir: ${e.message}` };
-        }
-      },
-      async excluir(id){
-        try{
-          const body = new URLSearchParams({ acao:'excluir', id });
-          const res = await fetch(endpoint, { method:'POST', body });
-          const txt = await res.text();
-          if(!res.ok) return { ok:false, message: txt || 'Falha ao excluir na planilha.' };
-          return { ok:true, message: txt || 'Excluída' };
-        }catch(e){
-          return { ok:false, message:`Erro ao excluir: ${e.message}` };
-        }
-      }
-    };
+const api = {
+
+async listar(ano,mes){
+
+const inicio =
+`${ano}-${String(mes+1).padStart(2,'0')}-01`
+
+const fim =
+`${ano}-${String(mes+2).padStart(2,'0')}-01`
+const {data,error} = await supabaseClient
+.from("reservas_mercatto")
+.select("*")
+.gte("datahora",inicio)
+.lt("datahora",fim)
+.order("datahora",{ascending:true})
+
+if(error) throw error
+
+return data || []
+
+},
+async cadastrar(payload){
+
+delete payload.id
+
+const {error} = await supabaseClient
+.from("reservas_mercatto")
+.insert(payload)
+
+if(error)
+return {ok:false,message:error.message}
+
+return {ok:true,message:"Reserva salva"}
+
+},
+
+async atualizar(id,payload){
+
+const {error} = await supabaseClient
+.from("reservas_mercatto")
+.update(payload)
+.eq("id",id)
+
+if(error)
+return {ok:false,message:error.message}
+
+return {ok:true,message:"Atualizado"}
+
+},
+
+async concluir(id,valorFinalPago){
+
+const {error} = await supabaseClient
+.from("reservas_mercatto")
+.update({
+status:"Concluída",
+valorFinalPago:valorFinalPago
+})
+.eq("id",id)
+
+if(error)
+return {ok:false,message:error.message}
+
+return {ok:true,message:"Concluída"}
+
+},
+
+async excluir(id){
+
+if(!id){
+return {ok:false,message:"ID inválido"}
+}
+
+const {data,error} = await supabaseClient
+.from("reservas_mercatto")
+.delete()
+.eq("id",String(id))
+.select()
+
+console.log("DELETE RESULT:",data,error)
+
+if(error)
+return {ok:false,message:error.message}
+
+return {ok:true,message:"Excluída"}
+
+}
+
+}
 
     /* ==============================
        Calendário
@@ -614,34 +1610,49 @@
         cell.className = 'cal-day' + (inMonth? '':' out');
         cell.dataset.date = ymd(d);
 
-        const items = state.reservas.filter(r=> r.datahora && ymd(new Date(r.datahora))===ymd(d));
+const items = state.reservas.filter(r=>{
+  if(!r.datahora) return false;
 
-        // Agrupar por setor e colorir VIP vs OUTROS
-        const norm = s => (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
-        const groups = new Map();
-        for (const r of items) {
-          const label = (r.mesa || '—').trim();
-          const key   = norm(label);
-          groups.set(key, { label, count:(groups.get(key)?.count||0)+1 });
-        }
-        const isVipKey = k => k === 'SALA VIP' || k === 'SALA VIP 2';
-        const sectorTags = Array.from(groups.entries()).map(([key, info]) => {
-          const vip = isVipKey(key);
-          const css = vip ? 't-vip' : 't-outros';
-          return `<span class="tag ${css}">${info.count} ${info.label}</span>`;
-        }).join('');
+  const local = new Date(r.datahora)
 
-        const pend = items.filter(r=> (r.status||'Pendente')!=='Concluída').length;
-        const done = items.filter(r=> r.status==='Concluída').length;
+  return ymd(local) === ymd(d)
+});
+      
 
-        cell.innerHTML = `
-          <div class="num">${d.getDate()}</div>
-          <div class="tags">
-            ${sectorTags}
-            ${pend ? `<span class="tag t-pend">Pend: ${pend}</span>` : ''}
-            ${done ? `<span class="tag t-done">Conc: ${done}</span>` : ''}
-          </div>
-        `;
+
+      const total = items.length
+
+const pend = items.filter(r=>{
+  const s = (r.status || "").trim()
+  return s === "Pendente"
+}).length
+
+const conf = items.filter(r=>{
+  const s = (r.status || "").trim()
+  return s === "Confirmada"
+}).length
+
+const done = items.filter(r=>{
+  const s = (r.status || "").trim()
+  return s === "Concluída"
+}).length
+
+const resumoTags = `
+${total ? `<span class="tag t-outros">${total} reservas</span>` : ''}
+`
+
+cell.innerHTML = `
+  <div class="num">${d.getDate()}</div>
+  <div class="tags">
+    ${resumoTags}
+    ${pend ? `<span class="tag t-pend">P: ${pend}</span>` : ''}
+    ${conf ? `<span class="tag t-vip">C: ${conf}</span>` : ''}
+    ${done ? `<span class="tag t-done">OK: ${done}</span>` : ''}
+  </div>
+`;
+
+
+        
         cell.addEventListener('click', ()=> openDayModal(d, items));
         calGrid.appendChild(cell);
       }
@@ -651,17 +1662,30 @@
        Resumo mensal
     ============================== */
     function sumExtrasFromRecord(r){
-      const keys = Object.keys(r||{}).filter(k=>k.toLowerCase().startsWith('pagamentoextra'));
-      return keys.reduce((acc,k)=> acc + parseBRL(r[k]), 0);
+const keys = Object.keys(r||{})
+.filter(k=>k.toLowerCase().startsWith('pagamentoextra') && r[k]);
+return keys.reduce((acc,k)=> acc + parseBRL(r[k]), 0);
     }
     function updateSummary(){
       const {mes, ano} = state;
-      const inMonth = state.reservas.filter(r=>{ const d=new Date(r.datahora); return d.getMonth()===mes && d.getFullYear()===ano; });
-      const sum = (arr,fn)=> arr.reduce((a,b)=>a+fn(b),0);
+const inMonth = state.reservas.filter(r=>{
+
+if(!r.datahora) return false
+
+const local = new Date(r.datahora)
+
+return local.getMonth()===mes && local.getFullYear()===ano
+})
+
+      
+  const sum = (arr,fn)=> arr.reduce((a,b)=>a+fn(b),0);
       const adiantado = sum(inMonth, r=> parseBRL(r.pagamentoAntecipado||0) + sumExtrasFromRecord(r));
       const finalPago = sum(inMonth, r=> parseBRL(r.valorFinalPago||0));
-      const aReceber = sum(inMonth.filter(r=> (r.status||'Pendente')!=='Concluída'), r=> {
-        const estimado = parseBRL(r.valorEstimado||0);
+const aReceber = sum(inMonth.filter(r=>{
+const s = (r.status || "Pendente").trim()
+return s !== "Concluída"
+}), r=> {
+  const estimado = parseBRL(r.valorEstimado||0);
         const ant = parseBRL(r.pagamentoAntecipado||0) + sumExtrasFromRecord(r);
         const rest = Math.max(estimado - ant, 0);
         return rest;
@@ -676,6 +1700,9 @@
        Modal do dia
     ============================== */
     const dayModal = $('#dayModal');
+    const deleteModal = $('#deleteModal');
+const deleteText = $('#deleteText');
+let deleteId = null;
     function openDayModal(date, items){
       $('#modalTitle').textContent = `Reservas de ${date.toLocaleDateString('pt-BR')}`;
       const list = $('#modalList');
@@ -683,47 +1710,193 @@
       else{
         list.innerHTML = items.map(r=> renderResItem(r)).join('');
         $$('#dayModal .btn-concluir').forEach(btn=> btn.addEventListener('click', onClickConcluir));
-        $$('#dayModal .btn-editar').forEach(btn=> btn.addEventListener('click', onClickEditar));
-        $$('#dayModal .btn-excluir').forEach(btn=> btn.addEventListener('click', onClickExcluir));
+$$('#dayModal .btn-download').forEach(btn=>{
+
+btn.addEventListener("click",e=>{
+
+const url=e.currentTarget.dataset.url;
+
+const nome=e.currentTarget.dataset.name;
+
+baixarArquivo(url,nome);
+
+});
+
+});
+        
+$$('#dayModal .btn-editar')
+.forEach(btn=>btn.addEventListener('click', onClickEditar))
+
+$$('#dayModal .btn-excluir')
+.forEach(btn=>btn.addEventListener('click', onClickExcluir))
+
+$$('#dayModal .status-select')
+.forEach(sel=>sel.addEventListener('change', alterarStatus))
+      
+        $$('#dayModal .btn-whatsapp').forEach(btn=> btn.addEventListener('click', enviarWhatsApp));
       }
       dayModal.classList.add('show');
     }
     dayModal.addEventListener('click', (e)=>{ if(e.target===dayModal) dayModal.classList.remove('show'); });
 
-    function renderResItem(r){
-      const hora = new Date(r.datahora).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-      const status = r.status||'Pendente';
+function renderResItem(r){
 
-      const anexoKeys = Object.keys(r).filter(k => k.toLowerCase().includes("anexo") && r[k]);
-      const anexos = anexoKeys.map((k,i) => `<a href="${r[k]}" target="_blank">📎 Anexo ${i+1}</a>`).join("<br>");
+let hora = "--:--"
 
-      const pagamentoKeys = Object.keys(r).filter(k=> /pagamento/i.test(k) && !['pagamentoAntecipado','valorFinalPago','valorEstimado'].includes(k));
-      const pagamentos = pagamentoKeys.map((k,i)=> `💵 Pagamento ${i+1}: ${formatBRL(parseBRL(r[k]))}`).join('<br>');
+if(r.datahora){
 
-      return `<div class="res-item" data-id="${r.id}">
-        <div class="top">
-          <div>
-            <div class="name">${r.nome||'—'}</div>
-            <div class="meta">${hora} • ${r.mesa||'—'} • ${r.pessoas||'0'} pessoa(s)</div>
-          </div>
-          <div class="row" style="margin-left:auto">
-            <span class="chip">${status}</span>
-            ${r._semIdReal
-              ? `<button class="btn btn-ghost" style="width:auto" disabled title="Sem ID da planilha">Editar</button>`
-              : `<button class="btn btn-ghost btn-editar" data-id="${r.id}" style="width:auto">Editar</button>`
-            }
-            <button class="btn btn-danger btn-excluir" data-id="${r.id}" style="width:auto">Excluir</button>
-            <button class="btn btn-primary btn-concluir" data-id="${r.id}" style="width:auto">Concluir</button>
-          </div>
-        </div>
-        <div class="meta"><b>Email:</b> ${r.email||'—'} • <b>Tel:</b> ${r.telefone||'—'}</div>
-        <div class="meta"><b>Cardápio:</b> ${r.cardapio||'—'} • <b>Banco:</b> ${r.banco||'—'}</div>
-        <div class="meta"><b>Obs:</b> ${r.observacoes||'—'}</div>
-        <div class="meta">Estimado: ${formatBRL(parseBRL(r.valorEstimado||0))} • Adiantamento: ${formatBRL(parseBRL(r.pagamentoAntecipado||0) + sumExtrasFromRecord(r))} • Final pago: ${formatBRL(parseBRL(r.valorFinalPago||0))}</div>
-        ${pagamentos? `<div class="meta">${pagamentos}</div>`:""}
-        ${anexos? `<div class="meta">${anexos}</div>`:""}
-      </div>`;
-    }
+const local = new Date(r.datahora)
+
+hora = local.toLocaleTimeString(
+'pt-BR',
+{
+hour:'2-digit',
+minute:'2-digit'
+}
+)
+
+}
+
+const status = r.status || "Pendente"
+
+/* anexos */
+const anexoKeys = Object.keys(r).filter(
+k => k.toLowerCase().includes("anexo") && r[k]
+)
+
+const anexos = anexoKeys.map((k,i)=>
+`<button class="btn btn-ghost btn-download"
+data-url="${r[k]}"
+data-name="anexo_${i+1}">
+📎 Baixar Anexo ${i+1}
+</button>`
+).join("<br>")
+
+/* pagamentos extras */
+const pagamentoKeys = Object.keys(r).filter(
+k=> /pagamento/i.test(k) &&
+!['pagamentoAntecipado','valorFinalPago','valorEstimado'].includes(k)
+)
+
+/* ==============================
+   MOSTRAR PAGAMENTOS SOMENTE VIP
+============================== */
+
+const local = (r.mesa || "").toLowerCase().trim()
+
+const isVIP =
+local === "sala vip" ||
+local === "sala vip 1" ||
+local === "sala vip 2"
+
+let pagamentos = ""
+
+if(isVIP){
+
+pagamentos = pagamentoKeys.map((k,i)=>
+`💵 Pagamento ${i+1}: ${formatBRL(parseBRL(r[k]))}`
+).join("<br>")
+
+}
+
+return `
+<div class="res-item" data-id="${r.id}">
+<div class="top">
+
+<div>
+<div class="name">${r.nome||'—'}</div>
+<div class="meta">
+${hora} • ${r.mesa||'—'} • ${r.pessoas||'0'} pessoa(s)
+</div>
+</div>
+
+<div class="row" style="margin-left:auto">
+
+<button class="btn btn-primary btn-whatsapp"
+data-nome="${r.nome}"
+data-telefone="${r.telefone}"
+data-data="${hora}"
+data-pessoas="${r.pessoas}"
+data-local="${r.mesa}"
+data-cardapio="${r.cardapio||''}"
+style="width:auto">
+WhatsApp
+</button>
+
+<span class="chip ${
+status
+.toLowerCase()
+.normalize("NFD")
+.replace(/[\u0300-\u036f]/g,'')
+}">
+${status}
+</span>
+
+<button class="btn btn-ghost btn-editar"
+data-id="${r.id}"
+style="width:auto">
+Editar
+</button>
+
+<button class="btn btn-danger btn-excluir"
+data-id="${r.id}"
+style="width:auto">
+Excluir
+</button>
+
+<select class="status-select"
+data-id="${r.id}"
+style="width:auto">
+
+<option value="Pendente" ${status==="Pendente"?"selected":""}>
+Pendente
+</option>
+
+<option value="Confirmada" ${status==="Confirmada"?"selected":""}>
+Confirmada
+</option>
+
+<option value="Concluída" ${status==="Concluída"?"selected":""}>
+Concluída
+</option>
+
+<option value="Cancelada" ${status==="Cancelada"?"selected":""}>
+Cancelada
+</option>
+
+</select>
+
+</div>
+</div>
+
+<div class="meta">
+<b>Email:</b> ${r.email||'—'} • <b>Tel:</b> ${r.telefone||'—'}
+</div>
+
+<div class="meta">
+<b>Cardápio:</b> ${r.cardapio||'—'} 
+• <b>Comanda Individual:</b> ${r.comandaIndividual||'Não'}
+• <b>Banco:</b> ${r.banco||'—'}
+</div>
+
+<div class="meta">
+<b>Obs:</b> ${r.observacoes||'—'}
+</div>
+
+<div class="meta">
+Estimado: ${formatBRL(parseBRL(r.valorEstimado))}
+•
+Adiantamento: ${formatBRL(parseBRL(r.pagamentoAntecipado))}
+•
+Final pago: ${formatBRL(parseBRL(r.valorFinalPago))}
+</div>
+
+${pagamentos ? `<div class="meta">${pagamentos}</div>` : ""}
+${anexos ? `<div class="meta">${anexos}</div>` : ""}
+
+</div>
+`
+}
 
     /* ==============================
        Form & validações
@@ -731,7 +1904,7 @@
     const form = $('#reservaForm');
     const spinner = $('#spinner');
     const submitBtn = $('#submitBtn');
-    const cancelEditBtn = $('#cancelEdit');
+const cancelEditBtn = $('#cancelEdit') || {style:{display:'none'}};
     const statusChip = $('#statusChip');
 
     const inputTelefone = $('#telefone');
@@ -747,8 +1920,19 @@
 
     inputData.min = nowLocalMin();
     inputTelefone.addEventListener('input', e => e.target.value = maskPhone(e.target.value));
-    ;[inputValor, inputSinal].forEach(inp => inp.addEventListener('input', e => e.target.value = formatBRLInput(e.target.value)));
+const moneyInputs = [
+  $('#valorEstimado'),
+  $('#pagamentoAntecipado'),
+  $('#finalPagoInput'),
+  $('#e_valorEstimado'),
+  $('#e_pagamentoAntecipado')
+].filter(Boolean);
 
+moneyInputs.forEach(inp => {
+  inp.addEventListener('input', e => {
+    e.target.value = formatBRLInput(e.target.value);
+  });
+});
     const toggleBancoRequired = () => {
       const v = parseBRL(inputSinal.value);
       const has = v > 0; selectBanco.required = has; bancoReq.style.display = has? '' : 'none';
@@ -807,19 +1991,63 @@
 
       spinner.classList.remove('show'); submitBtn.disabled = false;
     });
+function collectPayload(){
 
-    function collectPayload(){
-      const fd = new FormData(form);
-      const obj = Object.fromEntries(fd.entries());
-      obj.valorEstimado = String(parseBRL(obj.valorEstimado||0));
-      obj.pagamentoAntecipado = String(parseBRL(obj.pagamentoAntecipado||0));
-      return obj;
-    }
+const fd = new FormData(form)
 
+const obj = Object.fromEntries(fd.entries())
+
+// remover id vazio
+if(!obj.id){
+delete obj.id
+}
+
+/* =========================
+   CORREÇÃO DE TIMEZONE
+========================= */
+
+if(obj.datahora){
+const d = new Date(obj.datahora)
+
+const offset = d.getTimezoneOffset() * 60000
+
+const localISO = new Date(d - offset)
+.toISOString()
+.slice(0,19)
+
+obj.datahora = localISO}
+
+obj.valorEstimado = parseBRL(obj.valorEstimado || 0)
+
+obj.pagamentoAntecipado = parseBRL(obj.pagamentoAntecipado || 0)
+
+/* =========================
+   PAGAMENTOS EXTRAS
+========================= */
+
+const extras = document.querySelectorAll(".extraValor")
+
+extras.forEach((input,i)=>{
+
+const valor = parseBRL(input.value)
+
+if(valor > 0){
+
+obj["pagamentoextra"+(i+1)] = valor
+
+}
+
+})
+
+return obj
+
+}
     /* ==============================
        Ações: Editar / Concluir / Excluir
     ============================== */
     function onClickEditar(e){
+    document.getElementById("extrasList").innerHTML = ""
+extrasCount = 0
       const id = e.currentTarget.dataset.id;
       const r = state.reservas.find(x=>String(x.id)===String(id));
       if(!r) return;
@@ -829,34 +2057,45 @@
         return;
       }
 
-      // Marca edição
-      state.editingId = r.id;
-      $('#reservaId').value = r.id;
-      $('#cancelEdit').style.display = ''; // mostra "Cancelar edição"
+state.editingId = r.id
 
-      // Preenche formulário principal
-      $('#nome').value = r.nome || '';
-      $('#email').value = r.email || '';
-      $('#telefone').value = r.telefone || '';
-      $('#pessoas').value = r.pessoas || '';
-      $('#mesa').value = r.mesa || '';
-      $('#cardapio').value = r.cardapio || '';
-      $('#observacoes').value = r.observacoes || '';
+document.getElementById("editId").value = r.id
 
-      // Data/hora no formato local
-      if (r.datahora){
-        const dt = new Date(r.datahora);
-        const off = new Date(dt);
-        off.setMinutes(dt.getMinutes() - dt.getTimezoneOffset());
-        $('#datahora').value = off.toISOString().slice(0,16);
-      } else {
-        $('#datahora').value = '';
-      }
+$('#reservaId').value = r.id
+      
+document.getElementById("e_nome").value = r.nome || ""
+document.getElementById("e_email").value = r.email || ""
+document.getElementById("e_telefone").value = r.telefone || ""
+document.getElementById("e_pessoas").value = r.pessoas || ""
 
-      // Valores R$
-      $('#valorEstimado').value = (Number(r.valorEstimado||0)).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
-      const adiant = Number(r.pagamentoAntecipado||0);
-      $('#pagamentoAntecipado').value = adiant.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+document.getElementById("e_mesa").value = r.mesa || ""
+document.getElementById("e_cardapio").value = r.cardapio || ""
+document.getElementById("e_comandaIndividual").value = r.comandaIndividual || ""
+
+document.getElementById("e_observacoes").value = r.observacoes || ""
+
+document.getElementById("e_banco").value = r.banco || ""
+
+document.getElementById("e_valorEstimado").value =
+formatBRLInput(String(parseBRL(r.valorEstimado || 0) * 100))
+
+document.getElementById("e_pagamentoAntecipado").value =
+formatBRLInput(String(parseBRL(r.pagamentoAntecipado || 0) * 100))
+
+if(r.datahora){
+
+const d = new Date(r.datahora)
+
+const offset = d.getTimezoneOffset() * 60000
+
+const local = new Date(d - offset)
+
+document.getElementById("e_datahora").value =
+local.toISOString().slice(0,16)
+
+} 
+$('#valorEstimado').value = formatBRLInput(String(parseBRL(r.valorEstimado || 0) * 100).replace(/\D/g,''));
+$('#pagamentoAntecipado').value = formatBRLInput(String(parseBRL(r.pagamentoAntecipado || 0) * 100).replace(/\D/g,''));
       $('#banco').value = r.banco || '';
 
       // Status
@@ -868,25 +2107,38 @@
       $('#banco').required = has;
       $('#bancoReq').style.display = has ? '' : 'none';
 
-      toast('✏️ Editando reserva — altere no formulário e clique em "Salvar Reserva".');
-      // Fecha o modal do dia, se estiver aberto
-      $('#dayModal').classList.remove('show');
+toast('✏️ Editando reserva');
+
+$('#dayModal').classList.remove('show');
+
+document.getElementById("editModal").classList.add("show");
     }
 
-    async function onClickExcluir(e){
-      const id = e.currentTarget.dataset.id;
-      const r = state.reservas.find(x=>String(x.id)===String(id));
-      if(!r) return;
-      const ok = confirm(`Excluir a reserva de ${r.nome||'—'} em ${new Date(r.datahora).toLocaleString('pt-BR')}? Esta ação não pode ser desfeita.`);
-      if(!ok) return;
-      const resp = await api.excluir(id);
-      if(resp.ok){
-        toast('🗑️ Reserva excluída');
-        await loadMonth(state.ano, state.mes);
-      }else{
-        toast('⚠️ ' + resp.message);
-      }
-    }
+function onClickExcluir(e){
+
+const id = e.currentTarget.dataset.id
+
+if(!id){
+toast("Registro sem ID. Não é possível excluir.")
+return
+}
+
+const r = state.reservas.find(x=>String(x.id)===String(id))
+if(!r){
+toast("Reserva não encontrada")
+return
+}
+
+deleteId = id
+
+deleteText.innerHTML =
+`Tem certeza que deseja excluir a reserva de <b>${r.nome}</b><br>
+ em <b>${r.datahora ? new Date(r.datahora).toLocaleString('pt-BR') : 'Data inválida'}</b>?`
+
+dayModal.classList.remove("show")
+deleteModal.classList.add("show")
+
+}
 
     // Concluir fluxo com modal
     const finishModal = $('#finishModal');
@@ -895,7 +2147,7 @@
 
     function onClickConcluir(e){
       finishId = e.currentTarget.dataset.id;
-      finalPagoInput.value = '';
+finalPagoInput.value = formatBRLInput('');
       finishModal.classList.add('show');
       finalPagoInput.focus();
     }
@@ -917,17 +2169,48 @@
       }
     });
 
-    // Cancelar edição
-    cancelEditBtn.addEventListener('click', ()=>{
-      state.editingId = null;
-      $('#reservaId').value = '';
-      $('#cancelEdit').style.display = 'none';
-      form.reset();
-      $('#statusChip').textContent = 'PENDENTE';
-      $('#fileBox').style.display='none';
-      $('#datahora').min = nowLocalMin();
-      toast('Edição cancelada.');
-    });
+
+
+$('#cancelDelete').addEventListener('click', ()=>{
+  deleteModal.classList.remove('show');
+  deleteId = null;
+});
+
+deleteModal.addEventListener('click', (e)=>{
+  if(e.target===deleteModal){
+    deleteModal.classList.remove('show');
+    deleteId = null;
+  }
+});
+
+$('#confirmDelete').addEventListener('click', async ()=>{
+
+  if(!deleteId) return;
+
+  const resp = await api.excluir(deleteId);
+
+  if(resp.ok){
+
+    toast('🗑️ Reserva excluída');
+
+    state.reservas = state.reservas.filter(r=>String(r.id)!==String(deleteId));
+
+    const el = document.querySelector(`.res-item[data-id="${deleteId}"]`);
+    if(el) el.remove();
+
+    buildCalendar();
+    updateSummary();
+
+  }else{
+    toast('⚠️ ' + resp.message);
+  }
+
+  deleteModal.classList.remove('show');
+  deleteId = null;
+
+});
+
+
 
     /* ==============================
        Navegação e Carregamento
@@ -935,32 +2218,35 @@
     $('#prevMonth').addEventListener('click', ()=>{ const m = new Date(state.ano,state.mes,1); m.setMonth(m.getMonth()-1); state.mes=m.getMonth(); state.ano=m.getFullYear(); refreshAll(); });
     $('#nextMonth').addEventListener('click', ()=>{ const m = new Date(state.ano,state.mes,1); m.setMonth(m.getMonth()+1); state.mes=m.getMonth(); state.ano=m.getFullYear(); refreshAll(); });
     $('#todayBtn').addEventListener('click', ()=>{ const t=new Date(); state.mes=t.getMonth(); state.ano=t.getFullYear(); refreshAll(); });
-    $('#refreshBtn').addEventListener('click', ()=> refreshAll());
 
     async function loadMonth(ano, mes){
       try{
         const data = await api.listar(ano, mes);
-        state.reservas = data.map((r,i)=> {
-          const idReal = r.id ?? r.ID ?? r.Id ?? r.IdReserva ?? r.IdPlanilha ?? r['Id'] ?? '';
-          return {
-            id: idReal || `ROW-${i+1}`,
-            _semIdReal: !idReal,
-            nome: r.nome||r.Nome||'',
-            email:r.email||r.Email||'',
-            telefone: r.telefone || r.Telefone || r.Fone || '',
-            pessoas:r.pessoas||r.Pessoas||'',
-            mesa:r.mesa||r.Mesa||r.Local||'',
-            cardapio:r.cardapio||r.Cardapio||'',
-            observacoes: r.observacoes || r.Observacoes || r.Obs || '',
-            datahora: r.datahora || r.DataHora || r.data || r.Data || '',
-            valorEstimado: String(r.valorEstimado ?? r.ValorEstimado ?? '0'),
-            pagamentoAntecipado: String(r.pagamentoAntecipado ?? r.Adiantamento ?? '0'),
-            valorFinalPago: String(r.valorFinalPago ?? r.FinalPago ?? '0'),
-            banco: r.banco || r.Banco || '',
-            status: r.status || r.Status || 'Pendente',
-            ...r
-          };
-        });
+state.reservas = data.map((r,i)=> {
+const idReal = r.id ?? r.ID ?? r.Id ?? r.IdReserva ?? r.IdPlanilha ?? r['Id'];
+
+return {
+
+id: idReal ? String(idReal) : null,
+  
+_semIdReal: !idReal,
+    nome: r.nome||r.Nome||'',
+    email:r.email||r.Email||'',
+    telefone: r.telefone || r.Telefone || r.Fone || '',
+    pessoas:r.pessoas||r.Pessoas||'',
+    mesa:r.mesa||r.Mesa||r.Local||'',
+    cardapio:r.cardapio||r.Cardapio||'',
+    observacoes: r.observacoes || r.Observacoes || r.Obs || '',
+    datahora: r.datahora || r.DataHora || r.data || r.Data || '',
+    valorEstimado: String(r.valorEstimado ?? r.ValorEstimado ?? '0'),
+    pagamentoAntecipado: String(r.pagamentoAntecipado ?? r.Adiantamento ?? '0'),
+    valorFinalPago: String(r.valorFinalPago ?? r.FinalPago ?? '0'),
+    banco: r.banco || r.Banco || '',
+status: (r.status || r.Status || 'Pendente')
+.toString()
+.trim(),    ...r
+  };
+});
 
       }catch(e){
         state.reservas = [];
@@ -969,13 +2255,387 @@
       buildCalendar(); updateSummary();
     }
 
-    function refreshAll(){ buildCalendar(); updateSummary(); loadMonth(state.ano, state.mes); }
+async function refreshAll(){
 
+await loadMonth(state.ano, state.mes)
+
+updateSummary()
+
+}
     // Inicialização
     window.addEventListener('DOMContentLoaded', ()=>{
       $('#datahora').min = nowLocalMin();
       refreshAll();
     });
-  </script>
+
+
+
+/* ==============================
+   SALVAR EDIÇÃO (MODAL)
+============================== */
+
+document.getElementById("saveEditBtn").addEventListener("click", async ()=>{
+
+const id = document.getElementById("editId").value
+
+if(!id){
+toast("Reserva inválida")
+return
+}
+
+const dh = document.getElementById("e_datahora").value
+
+let datahora = dh
+
+if(dh){
+
+const d = new Date(dh)
+
+const offset = d.getTimezoneOffset() * 60000
+
+datahora = new Date(d - offset)
+.toISOString()
+.slice(0,19)
+
+}
+
+const payload = {
+
+nome: document.getElementById("e_nome").value,
+email: document.getElementById("e_email").value,
+telefone: document.getElementById("e_telefone").value,
+pessoas: document.getElementById("e_pessoas").value,
+
+mesa: document.getElementById("e_mesa").value,
+cardapio: document.getElementById("e_cardapio").value,
+comandaIndividual: document.getElementById("e_comandaIndividual").value,
+
+datahora: datahora,
+
+valorEstimado: parseBRL(document.getElementById("e_valorEstimado").value),
+
+pagamentoAntecipado: parseBRL(document.getElementById("e_pagamentoAntecipado").value),
+
+banco: document.getElementById("e_banco").value,
+
+observacoes: document.getElementById("e_observacoes").value
+
+}
+/* ======================
+   PAGAMENTOS EXTRAS
+====================== */
+
+const extras = document.querySelectorAll("#extrasList .extraValor")
+
+extras.forEach((input,i)=>{
+
+const v = parseBRL(input.value)
+
+if(v>0){
+payload["pagamentoExtra"+(i+1)] = v
+}
+
+})
+
+const resp = await api.atualizar(id,payload)
+
+if(resp.ok){
+
+toast("✅ Reserva atualizada")
+
+document.getElementById("editModal").classList.remove("show")
+
+await loadMonth(state.ano,state.mes)
+
+}else{
+
+toast("⚠️ "+resp.message)
+
+}
+
+})
+
+
+
+/* ==============================
+   CANCELAR EDIÇÃO DO MODAL
+============================== */
+
+document.getElementById("cancelEditModal").addEventListener("click", ()=>{
+
+document.getElementById("editModal").classList.remove("show")
+
+state.editingId = null
+
+document.getElementById("editId").value = ""
+
+document.getElementById("extrasList").innerHTML = ""
+
+extrasCount = 0
+
+toast("Edição cancelada")
+
+})
+
+
+
+
+
+
+
+
+
+    
+let extrasCount = 0
+
+document.getElementById("addExtraBtn").addEventListener("click",()=>{
+
+if(extrasCount >= 5){
+
+toast("Máximo de 5 pagamentos extras")
+
+return
+
+}
+
+extrasCount++
+
+const div = document.createElement("div")
+
+div.className = "item-row-3"
+
+div.innerHTML = `
+
+<input class="extraValor" placeholder="Valor (R$)" inputmode="decimal">
+
+<select class="extraBanco">
+
+<option value="">Banco</option>
+
+<option>SICREDI</option>
+<option>ITAÚ</option>
+<option>CRÉDITO POS</option>
+<option>DÉBITO POS</option>
+
+</select>
+
+<button type="button" class="btn btn-danger removerExtra">Remover</button>
+
+`
+
+document.getElementById("extrasList").appendChild(div)
+
+const input = div.querySelector(".extraValor")
+
+input.addEventListener("input",e=>{
+e.target.value = formatBRLInput(e.target.value)
+})
+
+div.querySelector(".removerExtra").onclick = ()=>{
+
+div.remove()
+
+extrasCount--
+
+}
+
+})
+function baixarArquivo(url,nome){
+
+const a = document.createElement("a")
+
+if(!url){
+toast("Arquivo inválido")
+return
+}
+
+if(url.startsWith("data:")){
+a.href = url
+}else{
+a.href = "data:application/octet-stream;base64," + url
+}
+
+a.download = nome || "arquivo"
+
+document.body.appendChild(a)
+
+a.click()
+
+a.remove()
+
+}
+function enviarWhatsApp(e){
+
+const btn = e.currentTarget
+
+let telefone = (btn.dataset.telefone || "").replace(/\D/g,'')
+
+if(!telefone){
+toast("Telefone não informado")
+return
+}
+
+if(telefone.length === 11){
+telefone = "55"+telefone
+}
+
+const nome = btn.dataset.nome || ""
+const pessoas = btn.dataset.pessoas || ""
+const local = btn.dataset.local || ""
+const cardapio = btn.dataset.cardapio || ""
+const hora = btn.dataset.data || ""
+
+const mensagem =
+`Olá ${nome}!
+
+Sua reserva foi registrada no Mercatto Delícia.
+
+Horário: ${hora}
+Pessoas: ${pessoas}
+Local: ${local}
+Cardápio: ${cardapio}
+
+Aguardamos você!
+
+Mercatto Delícia`
+
+const url =
+`https://wa.me/${telefone}?text=${encodeURIComponent(mensagem)}`
+
+window.open(url,"_blank")
+
+}
+async function alterarStatus(e){
+
+const select = e.currentTarget
+const id = select.dataset.id
+const novoStatus = select.value
+
+const resp = await supabaseClient
+.from("reservas_mercatto")
+.update({status:novoStatus})
+.eq("id",id)
+
+if(resp.error){
+
+toast("Erro ao atualizar status")
+return
+
+}
+
+toast("Status atualizado para "+novoStatus)
+
+/* atualizar estado local */
+const reserva = state.reservas.find(r=>String(r.id)===String(id))
+if(reserva){
+reserva.status = novoStatus
+}
+
+const item = select.closest(".res-item")
+
+if(!item) return
+
+const chip = item.querySelector(".chip")
+
+const classe =
+novoStatus
+.toLowerCase()
+.normalize("NFD")
+.replace(/[\u0300-\u036f]/g,'')
+
+if(chip){
+chip.textContent = novoStatus
+chip.className = "chip " + classe
+}
+/* atualizar calendário e resumo */
+buildCalendar()
+updateSummary()
+
+}
+  document.getElementById("btnPDF").addEventListener("click", gerarPDFMes);
+
+function gerarPDFMes(){
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  const mesNome = monthNames[state.mes];
+  const ano = state.ano;
+
+  const reservas = state.reservas.filter(r=>{
+    if(!r.datahora) return false;
+    const d = new Date(r.datahora);
+    return d.getMonth() === state.mes && d.getFullYear() === ano;
+  });
+
+  // ===== CABEÇALHO =====
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(18);
+  doc.text(`Relatório de Reservas`, 14, 18);
+
+  doc.setFontSize(12);
+  doc.text(`${mesNome} de ${ano}`, 14, 26);
+
+  // ===== RESUMO =====
+  let y = 36;
+
+  const totalReservas = reservas.length;
+  const totalPessoas = reservas.reduce((a,r)=>a+Number(r.pessoas||0),0);
+
+  const totalEstimado = reservas.reduce((a,r)=>a+parseBRL(r.valorEstimado||0),0);
+  const totalAntecipado = reservas.reduce((a,r)=>a+parseBRL(r.pagamentoAntecipado||0),0);
+  const totalFinal = reservas.reduce((a,r)=>a+parseBRL(r.valorFinalPago||0),0);
+
+  doc.setFont("helvetica","bold");
+  doc.text("Resumo Geral", 14, y);
+  y+=8;
+
+  doc.setFont("helvetica","normal");
+  doc.text(`Total de Reservas: ${totalReservas}`, 14, y); y+=6;
+  doc.text(`Total de Pessoas: ${totalPessoas}`, 14, y); y+=6;
+  doc.text(`Valor Estimado: ${formatBRL(totalEstimado)}`, 14, y); y+=6;
+  doc.text(`Valor Antecipado: ${formatBRL(totalAntecipado)}`, 14, y); y+=6;
+  doc.text(`Valor Final Pago: ${formatBRL(totalFinal)}`, 14, y); y+=10;
+
+  // ===== LISTA =====
+  doc.setFont("helvetica","bold");
+  doc.text("Reservas Detalhadas", 14, y);
+  y+=8;
+
+  doc.setFontSize(10);
+
+  reservas.forEach(r=>{
+
+    if(y > 270){
+      doc.addPage();
+      y = 20;
+    }
+
+    const data = new Date(r.datahora).toLocaleString("pt-BR");
+
+    doc.setFont("helvetica","bold");
+    doc.text(`${r.nome}`, 14, y);
+    y+=5;
+
+    doc.setFont("helvetica","normal");
+
+    doc.text(`Data: ${data}`, 14, y); y+=4;
+    doc.text(`Pessoas: ${r.pessoas} • Local: ${r.mesa}`, 14, y); y+=4;
+    doc.text(`Status: ${r.status}`, 14, y); y+=4;
+
+    doc.text(
+      `Valores: Estimado ${formatBRL(r.valorEstimado)} | Antecipado ${formatBRL(r.pagamentoAntecipado)} | Final ${formatBRL(r.valorFinalPago)}`,
+      14, y
+    );
+
+    y+=8;
+
+  });
+
+  // ===== DOWNLOAD =====
+  doc.save(`relatorio_reservas_${mesNome}_${ano}.pdf`);
+}
+  
+</script>
 </body>
 </html>
